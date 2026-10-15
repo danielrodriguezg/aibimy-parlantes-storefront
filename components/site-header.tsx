@@ -9,7 +9,7 @@ export function SiteHeader() {
   return (
     <header className="fixed inset-x-0 top-0 z-40 border-b border-white/5 bg-escenario/55 text-blanco backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-5 sm:px-10">
-        <Link href="/" className="display text-xl text-caucho" aria-label="AIBIMY, inicio">
+        <Link href="/" className="wordmark text-2xl text-caucho" aria-label="AIBIMY, inicio">
           aibimy
         </Link>
         <nav aria-label="Principal" className="flex items-center gap-7 text-[0.9375rem]">

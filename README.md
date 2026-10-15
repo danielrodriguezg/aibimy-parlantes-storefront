@@ -16,6 +16,8 @@ Tienda headless en Next.js (App Router + Tailwind) para los parlantes AIBIMY pub
 - **Modelos reales:** si pones `public/models/<handle>.glb` (por ejemplo `public/models/parlante-aibimy-my362bt-bluetooth-30w.glb`), el sitio usa ese archivo en lugar del procedural, sin cambiar código. Se escala a la altura del catálogo. Comprímelo (Draco/KTX2) y mantenlo por debajo de ~1.5 MB.
 - El scroll de la portada (Lenis + GSAP ScrollTrigger) mueve la cámara por cinco capítulos. Con "reducir movimiento" activado no hay scroll suave ni animación automática; sin WebGL se muestran las fotos de Shopify.
 - Las cifras del catálogo salen de las descripciones de Shopify; lo que el fabricante no confirma queda en `null` y se muestra como "—".
+- Las medidas y los detalles visuales de cada modelo (`size`, `look` en `lib/catalog.ts`) salen de los planos de dimensiones del fabricante y de fotos frente, atrás, arriba y lado.
+- **Comparar renders con fotos:** en desarrollo, `/estudio?handle=<handle>&angle=frente|tresCuartos|lado|atras|arriba` muestra un modelo sobre fondo blanco desde ángulos fijos. En producción esa ruta responde 404. Antes y después de la última iteración: [`docs/renders/`](docs/renders/).
 
 ## Desarrollo
 

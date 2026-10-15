@@ -1,22 +1,33 @@
 "use client";
 
-import { useGLTF } from "@react-three/drei";
+import { RoundedBox, useGLTF } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useEffect, useMemo, useState } from "react";
-import type { ComponentProps } from "react";
 import * as THREE from "three";
 import type { SpeakerSpec } from "@/lib/catalog";
 import {
   PanelMode,
+  brushedMetal,
+  getIconTexture,
   getLogoTexture,
   glossBlack,
   makeFabric,
   makePanel,
   matteBlack,
   metal,
+  panelGlass,
   rope,
-  rubberOrange
+  rubberBlack,
+  rubberOrange,
+  type IconRow,
+  type LogoInk
 } from "@/components/three/materials";
+
+/*
+ * Procedural models of the five AIBIMY speakers, built from the manufacturer's dimension drawings
+ * and product photos (front, back, top and side). Units are decimeters; every model is centred on
+ * the origin and stands on y = -height / 2.
+ */
 
 /** Values the parent changes every frame (scroll, toggles) without re-rendering the model. */
 export type SpeakerControls = {
@@ -67,6 +78,8 @@ const roundedRect = (width: number, height: number, radius: number) =>
 
 const capsule = (width: number, height: number) => roundedRect(width, height, Math.min(width, height) / 2);
 
+const circle = (radius: number) => new THREE.Shape().absarc(0, 0, radius, 0, Math.PI * 2, false);
+
 /** A capsule band: `outer` minus a hole of `inner`. */
 function band(outer: [number, number], inner: [number, number]) {
   const shape = capsule(...outer);
@@ -74,14 +87,38 @@ function band(outer: [number, number], inner: [number, number]) {
   return shape;
 }
 
-/** Bends a flat XY geometry around a vertical cylinder of `radius`, centered at `angle` (0 = +Z). */
-function wrapToCylinder(geometry: THREE.BufferGeometry, radius: number, angle: number) {
+function annulus(outer: number, inner: number) {
+  const shape = circle(outer);
+  shape.holes.push(new THREE.Path().absarc(0, 0, inner, 0, Math.PI * 2, true));
+  return shape;
+}
+
+/** Extrudes `shape` upward (along +y), centred on y = 0, with rounded top and bottom edges. */
+function extrudeUp(shape: THREE.Shape, height: number, bevel: number, bevelSize = bevel, curveSegments = 48) {
+  const depth = Math.max(0.001, height - bevel * 2);
+  const geometry = new THREE.ExtrudeGeometry(shape, {
+    depth,
+    bevelEnabled: bevel > 0,
+    bevelThickness: bevel,
+    bevelSize,
+    bevelSegments: 6,
+    curveSegments
+  });
+  geometry.rotateX(-Math.PI / 2);
+  geometry.translate(0, -depth / 2, 0);
+  return geometry;
+}
+
+/**
+ * Bends a flat XY geometry around a vertical cylinder of `radius` whose axis passes through
+ * (cx, cz), centred at `angle` (0 = facing +Z). Local z becomes an offset off the surface.
+ */
+function wrapToCylinder(geometry: THREE.BufferGeometry, radius: number, angle: number, cx = 0, cz = 0) {
   const position = geometry.attributes.position as THREE.BufferAttribute;
   for (let i = 0; i < position.count; i++) {
-    const x = position.getX(i);
-    const theta = angle + x / radius;
+    const theta = angle + position.getX(i) / radius;
     const r = radius + position.getZ(i);
-    position.setXYZ(i, r * Math.sin(theta), position.getY(i), r * Math.cos(theta));
+    position.setXYZ(i, cx + r * Math.sin(theta), position.getY(i), cz + r * Math.cos(theta));
   }
   position.needsUpdate = true;
   geometry.computeVertexNormals();
@@ -109,16 +146,25 @@ function ribbon(points: THREE.Vector3[], width: number, side: THREE.Vector3) {
   return geometry;
 }
 
-/* ---------- shared pieces ---------- */
+/** A 4:1 plane for the wordmark; `vertical` turns it to read top-to-bottom as on the speakers. */
+function logoPlane(width: number, vertical = false, segments = 1) {
+  const geometry = new THREE.PlaneGeometry(width, width / 4, vertical ? 1 : segments, vertical ? segments : 1);
+  if (vertical) geometry.rotateZ(-Math.PI / 2);
+  return geometry;
+}
 
-/** Reads the display font next/font registered on <html>, once it has loaded. */
-function useDisplayFont() {
+/* ---------- shared materials ---------- */
+
+/** Reads the logo font next/font registered on <html>, once it has loaded. */
+function useLogoFont() {
   const [family, setFamily] = useState<string | null>(null);
   useEffect(() => {
-    const value = getComputedStyle(document.documentElement).getPropertyValue("--font-display").trim() || "sans-serif";
+    const root = getComputedStyle(document.documentElement);
+    const value =
+      root.getPropertyValue("--font-logo").trim() || root.getPropertyValue("--font-display").trim() || "sans-serif";
     let cancelled = false;
     document.fonts
-      .load(`600 100px ${value}`)
+      .load(`700 100px ${value}`)
       .catch(() => undefined)
       .then(() => {
         if (!cancelled) setFamily(value);
@@ -130,35 +176,39 @@ function useDisplayFont() {
   return family;
 }
 
-/** Material printing the orange wordmark; stays empty until the display font is ready. */
-function useLogoMaterial() {
-  const family = useDisplayFont();
-  const material = useMemo(
-    () =>
-      new THREE.MeshStandardMaterial({
-        transparent: true,
-        roughness: 0.7,
-        polygonOffset: true,
-        polygonOffsetFactor: -2,
-        visible: false
-      }),
-    []
-  );
+/**
+ * Material printing the wordmark. Orange and white are ink on the surface; rainbow sits behind
+ * the panel glass and glows. Stays invisible until the font is ready.
+ */
+function useLogoMaterial(ink: LogoInk = "orange") {
+  const family = useLogoFont();
+  const material = useMemo(() => {
+    const options = { transparent: true, polygonOffset: true, polygonOffsetFactor: -2, visible: false, depthWrite: false };
+    return ink === "rainbow"
+      ? new THREE.MeshBasicMaterial({ ...options, toneMapped: false, color: new THREE.Color(1.5, 1.5, 1.5) })
+      : new THREE.MeshStandardMaterial({ ...options, roughness: ink === "white" ? 0.45 : 0.7 });
+  }, [ink]);
   useEffect(() => {
     if (!family) return;
-    material.map = getLogoTexture(family);
+    material.map = getLogoTexture(family, ink);
     material.visible = true;
     material.needsUpdate = true;
-  }, [family, material]);
+  }, [family, ink, material]);
   return material;
 }
 
-function Logo({ width, ...props }: { width: number } & ComponentProps<"mesh">) {
-  const material = useLogoMaterial();
-  return (
-    <mesh material={material} {...props}>
-      <planeGeometry args={[width, width / 4]} />
-    </mesh>
+function useIconMaterial(row: IconRow) {
+  return useMemo(
+    () =>
+      new THREE.MeshStandardMaterial({
+        map: getIconTexture(row),
+        transparent: true,
+        roughness: 0.6,
+        polygonOffset: true,
+        polygonOffsetFactor: -2,
+        depthWrite: false
+      }),
+    [row]
   );
 }
 
@@ -174,13 +224,21 @@ function usePanels(panels: THREE.ShaderMaterial[], controls: SpeakerControls) {
 
 /* ---------- puck: MY262BT Pro, MY362BT ---------- */
 
-function Puck({ spec }: ModelProps) {
+function Puck({ spec, controls, hueOffset = 0 }: ModelProps) {
   const [w, h, d] = spec.size;
+  const { look } = spec;
+  const footH = 0.05;
+  const bodyH = h - footH;
+  const bodyY = footH / 2;
+  const plateT = 0.03;
+  const ringOuter = Math.min(w, bodyH) * 0.3;
+  const ringInner = ringOuter * 0.78;
+
   const parts = useMemo(() => {
-    const bevelThickness = d * 0.28;
-    const bevelSize = Math.min(w, h) * 0.08;
+    const bevelThickness = d * 0.3;
+    const bevelSize = Math.min(w, bodyH) * 0.085;
     const depth = d - bevelThickness * 2;
-    const body = new THREE.ExtrudeGeometry(squircleShape(w / 2 - bevelSize, h / 2 - bevelSize), {
+    const body = new THREE.ExtrudeGeometry(squircleShape(w / 2 - bevelSize, bodyH / 2 - bevelSize), {
       depth,
       bevelEnabled: true,
       bevelThickness,
@@ -188,43 +246,105 @@ function Puck({ spec }: ModelProps) {
       bevelSegments: 12,
       curveSegments: 128
     });
-    body.translate(0, 0, -depth / 2);
+    body.translate(0, bodyY, -depth / 2);
 
-    const back = new THREE.ExtrudeGeometry(squircleShape(w / 2 - bevelSize * 2.2, h / 2 - bevelSize * 2.2), {
-      depth: 0.04,
+    // The back is a separate plate: smooth plastic on the MY362BT, fabric on the MY262BT Pro.
+    const plate = new THREE.ExtrudeGeometry(squircleShape(w / 2 - bevelSize * 1.2, bodyH / 2 - bevelSize * 1.2), {
+      depth: plateT,
       bevelEnabled: true,
-      bevelThickness: 0.02,
-      bevelSize: 0.02,
+      bevelThickness: 0.015,
+      bevelSize: 0.03,
       bevelSegments: 4,
       curveSegments: 96
     });
-    back.translate(0, 0, -d / 2 - 0.035);
+    plate.translate(0, bodyY, -d / 2 - plateT + 0.012);
 
-    // The cord loops out of the upper right edge, like in the product photos.
-    const ax = w / 2 - bevelSize * 0.6;
-    const ay = h * 0.3;
-    const az = -d * 0.12;
+    const back = -d / 2 - plateT - 0.004;
+    const ring = new THREE.ShapeGeometry(annulus(ringOuter, ringInner), 96).rotateY(Math.PI).translate(0, bodyY, back);
+    const ringGlass = new THREE.ShapeGeometry(annulus(ringOuter, ringInner), 96)
+      .rotateY(Math.PI)
+      .translate(0, bodyY, back - 0.004);
+    const disc = new THREE.CylinderGeometry(ringInner * 0.97, ringInner * 0.97, 0.02, 64)
+      .rotateX(Math.PI / 2)
+      .translate(0, bodyY, back);
+    const discLogo = logoPlane(ringInner * 1.35).rotateY(Math.PI).translate(0, bodyY, back - 0.012);
+
+    const flap = new THREE.ExtrudeGeometry(roundedRect(w * 0.36, bodyH * 0.13, 0.04), {
+      depth: 0.025,
+      bevelEnabled: true,
+      bevelThickness: 0.008,
+      bevelSize: 0.008,
+      bevelSegments: 3
+    })
+      .rotateY(Math.PI)
+      .translate(0, bodyY + bodyH * 0.36, -d / 2 - plateT);
+
+    const topIcons = logoPlane(w * 0.46).rotateX(-Math.PI / 2).translate(0, bodyY + bodyH / 2 + 0.003, 0);
+    const frontLogo = logoPlane(w * 0.56).translate(0, bodyY - bodyH * 0.02, d / 2 + 0.004);
+
+    // The braided cord leaves the right edge near the top and hangs below the speaker.
+    const ax = w / 2 - bevelSize * 0.4;
+    const ay = bodyY + bodyH * 0.24;
     const loop = new THREE.CatmullRomCurve3(
       [
-        new THREE.Vector3(ax, ay, az),
-        new THREE.Vector3(ax + 0.16, ay - 0.12, az + 0.05),
-        new THREE.Vector3(ax + 0.26, -h * 0.2, az + 0.12),
-        new THREE.Vector3(ax + 0.17, -h * 0.5, az + 0.14),
-        new THREE.Vector3(ax + 0.06, -h * 0.26, az + 0.04)
+        new THREE.Vector3(ax, ay, -d * 0.1),
+        new THREE.Vector3(ax + 0.12, ay - 0.1, -d * 0.05),
+        new THREE.Vector3(ax + 0.17, -h * 0.25, d * 0.02),
+        new THREE.Vector3(ax + 0.12, -h * 0.62, d * 0.06),
+        new THREE.Vector3(ax + 0.04, -h * 0.3, d * 0.02)
       ],
       true
     );
-    const cord = new THREE.TubeGeometry(loop, 160, 0.028 * (w / 1.5 + 0.4), 12, true);
+    const cord = new THREE.TubeGeometry(loop, 160, 0.018 + w * 0.006, 10, true);
+    const slider = new THREE.CylinderGeometry(0.035, 0.035, 0.11, 16).translate(ax + 0.155, -h * 0.12, d * 0.0);
 
-    return { body, back, cord, fabric: makeFabric(), plastic: matteBlack(), rope: rope() };
-  }, [w, h, d]);
+    const fabric = makeFabric();
+    const panel = makePanel(PanelMode.Radial, [ringOuter, ringInner], hueOffset);
+
+    return {
+      body,
+      plate,
+      ring,
+      ringGlass,
+      disc,
+      discLogo,
+      flap,
+      topIcons,
+      frontLogo,
+      cord,
+      slider,
+      fabric,
+      plateMaterial: look.back === "fabric" ? fabric : matteBlack(),
+      discMaterial: look.disc === "brushed" ? brushedMetal() : glossBlack(),
+      rubber: rubberBlack(),
+      plastic: matteBlack(),
+      glass: panelGlass(),
+      rope: rope(),
+      panels: [panel]
+    };
+  }, [w, h, d, bodyH, bodyY, ringOuter, ringInner, look.back, look.disc, hueOffset]);
+
+  usePanels(parts.panels, controls);
+  const orangeInk = useLogoMaterial("orange");
+  const whiteInk = useLogoMaterial("white");
+  const icons = useIconMaterial("top");
 
   return (
     <group>
       <mesh geometry={parts.body} material={parts.fabric} castShadow />
-      <mesh geometry={parts.back} material={parts.plastic} />
-      {spec.strap && <mesh geometry={parts.cord} material={parts.rope} castShadow />}
-      <Logo width={w * 0.56} position={[0, -h * 0.02, d / 2 + 0.004]} />
+      <mesh geometry={parts.plate} material={parts.plateMaterial} />
+      <mesh geometry={parts.ring} material={parts.panels[0]} />
+      <mesh geometry={parts.ringGlass} material={parts.glass} />
+      <mesh geometry={parts.disc} material={parts.discMaterial} />
+      <mesh geometry={parts.discLogo} material={whiteInk} />
+      <mesh geometry={parts.frontLogo} material={orangeInk} />
+      {look.portFlap && <mesh geometry={parts.flap} material={parts.rubber} />}
+      {look.topButtons && <mesh geometry={parts.topIcons} material={icons} />}
+      <RoundedBox args={[w * 0.46, footH + 0.03, d * 0.5]} radius={0.015} position={[0, -h / 2 + (footH + 0.03) / 2, 0]}>
+        <primitive object={parts.plastic} attach="material" />
+      </RoundedBox>
+      <mesh geometry={parts.cord} material={parts.rope} castShadow />
+      <mesh geometry={parts.slider} material={parts.rubber} />
     </group>
   );
 }
@@ -259,102 +379,116 @@ function Driver({ radius }: { radius: number }) {
   );
 }
 
+/** Light panel wrapped around one rounded end of a prism: bezel, light, glass and a small logo. */
+function useEndPanel(radius: number, centerX: number, side: 1 | -1, width: number, height: number) {
+  return useMemo(() => {
+    const angle = (side * Math.PI) / 2;
+    const wrap = (geometry: THREE.BufferGeometry, lift: number) =>
+      wrapToCylinder(geometry.translate(0, 0, lift), radius, angle, centerX, 0);
+    return {
+      bezel: wrap(new THREE.ShapeGeometry(capsule(width + 0.08, height + 0.08), 32), 0.006),
+      light: wrap(new THREE.ShapeGeometry(capsule(width, height), 32), 0.01),
+      glass: wrap(new THREE.ShapeGeometry(capsule(width, height), 32), 0.016),
+      logo: wrap(logoPlane(height * 0.3, true, 12), 0.013)
+    };
+  }, [radius, centerX, side, width, height]);
+}
+
 function Prism({ spec, controls, hueOffset = 0 }: ModelProps) {
   const [w, h, d] = spec.size;
-  const capH = 0.11;
-  const rim = 0.035;
-  const bodyH = h - capH * 2;
-  const radius = d * 0.3;
+  const { look } = spec;
+  const R = d / 2;
+  const L = w / 2 - R;
+  const capH = h * 0.05;
+  const lineH = 0.022;
+  const bodyH = h - (capH + lineH) * 2;
+  const panelW = d * 0.6;
+  const panelH = bodyH * 0.56;
+  const sideHalf: [number, number] = [panelW / 2, panelH / 2];
 
   const parts = useMemo(() => {
-    const body = new THREE.ExtrudeGeometry(roundedRect(w, d, radius), {
-      depth: bodyH,
-      bevelEnabled: false,
-      curveSegments: 32
-    });
-    body.rotateX(-Math.PI / 2);
-    body.translate(0, -bodyH / 2, 0);
+    // Stadium cross-section: flat front and back, fully rounded ends (manufacturer top view).
+    const body = extrudeUp(roundedRect(w, d, R), bodyH, 0, 0, 64);
+    const line = extrudeUp(roundedRect(w + 0.012, d + 0.012, R + 0.006), lineH, 0, 0, 64);
+    const cap = extrudeUp(roundedRect(w + 0.02, d + 0.02, R + 0.01), capH, 0.03, 0.022, 64);
 
-    const cap = new THREE.ExtrudeGeometry(roundedRect(w + 0.04, d + 0.04, radius + 0.02), {
-      depth: capH - rim * 2,
+    const topW = w - 0.18;
+    const topD = d - 0.18;
+    const topHalf: [number, number] = [topW / 2, topD / 2];
+    const top = new THREE.ShapeGeometry(roundedRect(topW, topD, topD / 2), 64).rotateX(-Math.PI / 2);
+    const topLogo = logoPlane(topW * 0.42).rotateX(-Math.PI / 2);
+
+    const pillW = Math.min(2 * L * 1.08, w * 0.56);
+    const pill = new THREE.ExtrudeGeometry(roundedRect(pillW, 0.15, 0.075), {
+      depth: 0.016,
       bevelEnabled: true,
-      bevelThickness: rim,
-      bevelSize: 0.02,
-      bevelSegments: 6,
-      curveSegments: 32
+      bevelThickness: 0.008,
+      bevelSize: 0.008,
+      bevelSegments: 3,
+      curveSegments: 24
     });
-    cap.rotateX(-Math.PI / 2);
+    const pillIcons = logoPlane(pillW * 0.8);
 
-    const topHalf: [number, number] = [w * 0.37, d * 0.3];
-    const topPanel = new THREE.ShapeGeometry(roundedRect(topHalf[0] * 2, topHalf[1] * 2, d * 0.26), 32);
-    topPanel.rotateX(-Math.PI / 2);
+    // MY274BT: two orange cords down the back, held by a black clip; every prism has a top hook.
+    const cord = (x: number) =>
+      new THREE.TubeGeometry(
+        new THREE.CatmullRomCurve3([
+          new THREE.Vector3(x, h / 2 - capH * 0.6, -R + 0.01),
+          new THREE.Vector3(x, h * 0.25, -R - 0.03),
+          new THREE.Vector3(x, -h * 0.25, -R - 0.03),
+          new THREE.Vector3(x, -h / 2 + capH * 0.6, -R + 0.01)
+        ]),
+        64,
+        0.02,
+        10
+      );
 
-    const sideHalf: [number, number] = [d * 0.17, bodyH * 0.25];
-    const sidePanel = new THREE.ShapeGeometry(capsule(sideHalf[0] * 2, sideHalf[1] * 2), 32);
-    const sideFrame = new THREE.ExtrudeGeometry(capsule(sideHalf[0] * 2 + 0.09, sideHalf[1] * 2 + 0.09), {
-      depth: 0.04,
-      bevelEnabled: true,
-      bevelThickness: 0.015,
-      bevelSize: 0.015,
-      bevelSegments: 4,
-      curveSegments: 32
-    });
-
-    const buttons = new THREE.ExtrudeGeometry(roundedRect(w * 0.5, 0.16, 0.06), {
-      depth: 0.02,
-      bevelEnabled: true,
-      bevelThickness: 0.01,
-      bevelSize: 0.01,
-      bevelSegments: 3
-    });
-
-    // The MY274BT carries an orange cord down its back.
-    const strap = ribbon(
-      [
-        new THREE.Vector3(0, h / 2 - capH, -d / 2 - 0.01),
-        new THREE.Vector3(0, h * 0.2, -d / 2 - 0.05),
-        new THREE.Vector3(0, -h * 0.2, -d / 2 - 0.05),
-        new THREE.Vector3(0, -h / 2 + capH, -d / 2 - 0.01)
-      ],
-      0.07,
-      new THREE.Vector3(1, 0, 0)
-    );
-
-    const strapMaterial = rubberOrange();
-    strapMaterial.side = THREE.DoubleSide;
-    // Transparent from the start: toggling it later would recompile the shader mid-scroll.
     const fabric = makeFabric();
+    // Transparent from the start: toggling it later would recompile the shader mid-scroll.
     fabric.transparent = true;
 
     return {
       body,
+      line,
       cap,
-      topPanel,
-      sidePanel,
-      sideFrame,
-      buttons,
-      strap,
-      strapMaterial,
+      top,
+      topLogo,
+      topHalf,
+      pill,
+      pillW,
+      pillIcons,
+      cords: [cord(-0.055), cord(0.055)],
       fabric,
-      caps: [glossBlack(), rubberOrange()],
+      rubber: rubberBlack(),
+      orange: rubberOrange(),
       gloss: glossBlack(),
+      glass: panelGlass(),
       plastic: matteBlack(),
-      panels: [makePanel(PanelMode.Rings, topHalf, hueOffset), makePanel(PanelMode.Stripes, sideHalf, hueOffset + 0.25)],
+      panels: [
+        makePanel(PanelMode.Rings, topHalf, hueOffset),
+        makePanel(PanelMode.Stripes, sideHalf, hueOffset + 0.25),
+        makePanel(PanelMode.Stripes, sideHalf, hueOffset + 0.6)
+      ],
       cellWrap: new THREE.MeshStandardMaterial({ color: "#1d3557", roughness: 0.5 }),
       board: new THREE.MeshStandardMaterial({ color: "#0f3d2e", roughness: 0.45, metalness: 0.2 })
     };
-  }, [w, h, d, bodyH, radius, hueOffset]);
+  }, [w, h, d, R, L, capH, bodyH, sideHalf, hueOffset]);
+
+  const right = useEndPanel(R, L, 1, panelW, panelH);
+  const left = useEndPanel(R, -L, -1, panelW, panelH);
 
   usePanels(parts.panels, controls);
-  const logo = useLogoMaterial();
+  const orangeInk = useLogoMaterial("orange");
+  const rainbowInk = useLogoMaterial("rainbow");
+  const icons = useIconMaterial("transport");
 
   const groups = useMemo(
     () => ({
       top: new THREE.Group(),
       bottom: new THREE.Group(),
-      side: new THREE.Group(),
+      right: new THREE.Group(),
+      left: new THREE.Group(),
       front: new THREE.Group(),
-      inside: new THREE.Group(),
       driverA: new THREE.Group(),
       driverB: new THREE.Group()
     }),
@@ -365,123 +499,141 @@ function Prism({ spec, controls, hueOffset = 0 }: ModelProps) {
     const e = controls.explode;
     parts.fabric.opacity = 1 - e * 0.8;
     parts.fabric.depthWrite = e <= 0.01;
-    logo.opacity = 1 - e;
+    orangeInk.opacity = 1 - e;
     groups.top.position.y = e * 0.75;
     groups.bottom.position.y = -e * 0.45;
-    groups.side.position.x = e * 0.4;
+    groups.right.position.x = e * 0.35;
+    groups.left.position.x = -e * 0.35;
     groups.front.position.z = e * 0.35;
-    groups.driverA.position.set(0, bodyH * 0.22, d * 0.08 + e * 0.5);
-    groups.driverB.position.set(0, -bodyH * 0.22, d * 0.08 + e * 0.5);
+    groups.driverA.position.set(0, bodyH * 0.22, d * 0.06 + e * 0.5);
+    groups.driverB.position.set(0, -bodyH * 0.22, d * 0.06 + e * 0.5);
   });
 
-  const [top, side] = parts.panels;
-  const driverRadius = Math.min(w, bodyH / 2) * 0.33;
+  const [topPanel, rightPanel, leftPanel] = parts.panels;
+  const topY = h / 2;
+  const capY = bodyH / 2 + lineH + capH / 2;
+  const lineY = bodyH / 2 + lineH / 2;
+  const driverRadius = Math.min(d * 0.9, bodyH / 2) * 0.36;
 
   return (
     <group>
       <mesh geometry={parts.body} material={parts.fabric} castShadow />
 
       <primitive object={groups.top}>
-        <mesh geometry={parts.cap} material={parts.caps} position={[0, bodyH / 2 + rim, 0]} castShadow />
-        <mesh geometry={parts.topPanel} material={top} position={[0, bodyH / 2 + capH + 0.002, 0]} />
+        <mesh geometry={parts.line} material={parts.orange} position-y={lineY} />
+        <mesh geometry={parts.cap} material={parts.rubber} position-y={capY} castShadow />
+        <mesh geometry={parts.top} material={topPanel} position-y={topY + 0.002} />
+        <mesh geometry={parts.topLogo} material={rainbowInk} position-y={topY + 0.004} />
+        <mesh geometry={parts.top} material={parts.glass} position-y={topY + 0.006} />
+        <mesh material={parts.orange} position={[0, topY - 0.005, -R + 0.07]} rotation={[0, Math.PI / 2, 0]}>
+          <torusGeometry args={[0.055, 0.018, 12, 32]} />
+        </mesh>
       </primitive>
 
       <primitive object={groups.bottom}>
-        <mesh geometry={parts.cap} material={parts.caps} position={[0, -bodyH / 2 - capH + rim, 0]} castShadow />
+        <mesh geometry={parts.line} material={parts.orange} position-y={-lineY} />
+        <mesh geometry={parts.cap} material={parts.rubber} position-y={-capY} castShadow />
       </primitive>
 
-      <primitive object={groups.side}>
-        <group position={[w / 2 - 0.02, 0, 0]} rotation={[0, Math.PI / 2, 0]}>
-          <mesh geometry={parts.sideFrame} material={parts.gloss} />
-          <mesh geometry={parts.sidePanel} material={side} position={[0, 0, 0.058]} />
+      {(
+        [
+          [groups.right, right, rightPanel],
+          [groups.left, left, leftPanel]
+        ] as const
+      ).map(([group, panel, light], i) => (
+        <primitive key={i} object={group}>
+          <mesh geometry={panel.bezel} material={parts.gloss} />
+          <mesh geometry={panel.light} material={light} />
+          <mesh geometry={panel.logo} material={rainbowInk} />
+          <mesh geometry={panel.glass} material={parts.glass} />
+        </primitive>
+      ))}
+
+      <primitive object={groups.front}>
+        <mesh material={orangeInk} position={[-L * 0.12, bodyH * 0.06, R + 0.004]}>
+          <primitive object={logoPlane(bodyH * 0.54, true)} attach="geometry" />
+        </mesh>
+        <group position={[0, -bodyH / 2 + h * 0.1, R - 0.006]}>
+          <mesh geometry={parts.pill} material={parts.rubber} />
+          <mesh geometry={parts.pillIcons} material={icons} position-z={0.026} />
         </group>
       </primitive>
 
-      <primitive object={groups.front}>
-        <mesh material={logo} position={[-w * 0.12, bodyH * 0.04, d / 2 + 0.004]} rotation={[0, 0, Math.PI / 2]}>
-          <planeGeometry args={[bodyH * 0.5, bodyH * 0.125]} />
-        </mesh>
-        <mesh geometry={parts.buttons} material={parts.plastic} position={[0, -bodyH / 2 + 0.2, d / 2 - 0.01]} />
-      </primitive>
-
-      {spec.strap && <mesh geometry={parts.strap} material={parts.strapMaterial} castShadow />}
+      {look.cords && (
+        <>
+          {parts.cords.map((geometry, i) => (
+            <mesh key={i} geometry={geometry} material={parts.orange} castShadow />
+          ))}
+          <RoundedBox args={[0.2, 0.42, 0.05]} radius={0.02} position={[0, 0, -R - 0.045]}>
+            <primitive object={parts.plastic} attach="material" />
+          </RoundedBox>
+        </>
+      )}
 
       {/* What the exploded view reveals: two drivers, the battery cells and the board.
           Always mounted (hidden by the shell) so their shaders are compiled before the reveal. */}
-      <primitive object={groups.inside}>
-        <primitive object={groups.driverA}>
-          <Driver radius={driverRadius} />
-        </primitive>
-        <primitive object={groups.driverB}>
-          <Driver radius={driverRadius} />
-        </primitive>
-        {[-1, 0, 1].map((i) => (
-          <mesh key={i} material={parts.cellWrap} position={[0, i * 0.2, -d * 0.2]} rotation={[0, 0, Math.PI / 2]}>
-            <cylinderGeometry args={[0.09, 0.09, w * 0.62, 24]} />
-          </mesh>
-        ))}
-        <mesh material={parts.board} position={[0, bodyH * 0.42, -d * 0.05]}>
-          <boxGeometry args={[w * 0.6, 0.03, d * 0.5]} />
-        </mesh>
+      <primitive object={groups.driverA}>
+        <Driver radius={driverRadius} />
       </primitive>
+      <primitive object={groups.driverB}>
+        <Driver radius={driverRadius} />
+      </primitive>
+      {[-1, 0, 1].map((i) => (
+        <mesh key={i} material={parts.cellWrap} position={[0, i * 0.2, -d * 0.18]} rotation={[0, 0, Math.PI / 2]}>
+          <cylinderGeometry args={[0.08, 0.08, w * 0.6, 24]} />
+        </mesh>
+      ))}
+      <mesh material={parts.board} position={[0, bodyH * 0.42, -d * 0.05]}>
+        <boxGeometry args={[w * 0.55, 0.03, d * 0.5]} />
+      </mesh>
     </group>
   );
 }
 
-/* ---------- cylinder: MY268BT ---------- */
+/* ---------- squircle column: MY268BT ---------- */
 
-function Cylinder({ spec, controls, hueOffset = 0 }: ModelProps) {
-  const [width, h] = spec.size;
-  const r = width / 2;
-  const panelAngle = 0.85;
-  const logoAngle = -0.6;
+function Column({ spec, controls, hueOffset = 0 }: ModelProps) {
+  const [w, h, d] = spec.size;
+  const capH = 0.13;
+  const bodyH = h - capH * 2;
+  const panelW = d * 0.32;
+  const panelH = h * 0.4;
+  const sideHalf: [number, number] = [panelW / 2, panelH / 2];
+  const ringOuter = Math.min(w, d) * 0.3;
+  const ringInner = ringOuter * 0.74;
 
   const parts = useMemo(() => {
-    const corner = 0.09;
-    const profile: THREE.Vector2[] = [];
-    for (let i = 0; i <= 8; i++) {
-      const a = -Math.PI / 2 + (i / 8) * (Math.PI / 2);
-      profile.push(new THREE.Vector2(r - corner + Math.cos(a) * corner, -h / 2 + corner + Math.sin(a) * corner));
-    }
-    for (let i = 0; i <= 8; i++) {
-      const a = (i / 8) * (Math.PI / 2);
-      profile.push(new THREE.Vector2(r - corner + Math.cos(a) * corner, h / 2 - corner + Math.sin(a) * corner));
-    }
-    const body = new THREE.LatheGeometry(profile, 128);
+    // Rounded-square section (107 × 108 mm) whose fabric rolls into black rubber end caps.
+    const body = extrudeUp(squircleShape(w / 2 - 0.12, d / 2 - 0.12, 2.7), bodyH + 0.08, 0.13, 0.12, 96);
+    const cap = extrudeUp(squircleShape(w / 2 - 0.13, d / 2 - 0.13, 2.7), capH, 0.05, 0.05, 96);
 
-    const ring = new THREE.Shape().absarc(0, 0, r * 0.8, 0, Math.PI * 2, false);
-    ring.holes.push(new THREE.Path().absarc(0, 0, r * 0.58, 0, Math.PI * 2, true));
-    const ringLight = new THREE.ShapeGeometry(ring, 96);
-    ringLight.rotateX(-Math.PI / 2);
+    const flat = (shape: THREE.Shape) => new THREE.ShapeGeometry(shape, 64).rotateX(-Math.PI / 2);
+    const recess = flat(circle(ringOuter * 1.18));
+    const ring = flat(annulus(ringOuter, ringInner));
+    const disc = flat(circle(ringInner * 0.94));
+    const discLogo = logoPlane(ringInner * 1.3).rotateX(-Math.PI / 2);
 
-    const panelHalf: [number, number] = [width * 0.14, h * 0.21];
-    const pw = panelHalf[0] * 2;
-    const ph = panelHalf[1] * 2;
-    const panel = wrapToCylinder(new THREE.ShapeGeometry(capsule(pw, ph), 24).translate(0, 0, 0.016), r, panelAngle);
-    const bezel = wrapToCylinder(
-      new THREE.ShapeGeometry(band([pw + 0.05, ph + 0.05], [pw, ph]), 24).translate(0, 0, 0.014),
-      r,
-      panelAngle
-    );
-    const frame = wrapToCylinder(
-      new THREE.ShapeGeometry(band([pw + 0.13, ph + 0.13], [pw + 0.05, ph + 0.05]), 24).translate(0, 0, 0.012),
-      r,
-      panelAngle
-    );
+    const frame = new THREE.ExtrudeGeometry(band([panelW + 0.17, panelH + 0.17], [panelW + 0.04, panelH + 0.04]), {
+      depth: 0.025,
+      bevelEnabled: true,
+      bevelThickness: 0.01,
+      bevelSize: 0.01,
+      bevelSegments: 3,
+      curveSegments: 32
+    });
+    const bezel = new THREE.ShapeGeometry(band([panelW + 0.04, panelH + 0.04], [panelW, panelH]), 32);
+    const light = new THREE.ShapeGeometry(capsule(panelW, panelH), 32);
 
-    const logo = wrapToCylinder(
-      new THREE.PlaneGeometry(h * 0.5, h * 0.125, 8, 24).rotateZ(Math.PI / 2).translate(0, -h * 0.04, 0.005),
-      r,
-      logoAngle
-    );
-
-    const strapAngle = Math.PI * 0.62;
-    const radial = (radius: number, y: number) =>
-      new THREE.Vector3(radius * Math.sin(strapAngle), y, radius * Math.cos(strapAngle));
+    // The wide orange strap runs down the back between the end caps.
     const strap = ribbon(
-      [radial(r + 0.01, h * 0.4), radial(r + 0.14, h * 0.18), radial(r + 0.16, -h * 0.08), radial(r + 0.01, -h * 0.32)],
-      0.2,
-      new THREE.Vector3(Math.cos(strapAngle), 0, -Math.sin(strapAngle))
+      [
+        new THREE.Vector3(0, bodyH / 2 + 0.02, -d / 2 + 0.01),
+        new THREE.Vector3(0, bodyH * 0.3, -d / 2 - 0.07),
+        new THREE.Vector3(0, -bodyH * 0.3, -d / 2 - 0.07),
+        new THREE.Vector3(0, -bodyH / 2 - 0.02, -d / 2 + 0.01)
+      ],
+      0.24,
+      new THREE.Vector3(1, 0, 0)
     );
 
     const strapMaterial = rubberOrange();
@@ -489,39 +641,71 @@ function Cylinder({ spec, controls, hueOffset = 0 }: ModelProps) {
 
     return {
       body,
-      ringLight,
-      panel,
-      bezel,
+      cap,
+      recess,
+      ring,
+      disc,
+      discLogo,
       frame,
-      logo,
+      bezel,
+      light,
       strap,
       strapMaterial,
-      fabric: makeFabric(2 * Math.PI * r * 2.6, h * 2.6),
-      glow: new THREE.MeshStandardMaterial({ color: "#ff5c00", emissive: "#ff4d00", emissiveIntensity: 0.9 }),
+      fabric: makeFabric(),
+      rubber: rubberBlack(),
       gloss: glossBlack(),
-      panels: [makePanel(PanelMode.Radial, [r * 0.8, r * 0.8], hueOffset), makePanel(PanelMode.Stripes, panelHalf, hueOffset + 0.3)]
+      glass: panelGlass(),
+      glow: new THREE.MeshStandardMaterial({ color: "#ff5200", emissive: "#ff3d00", emissiveIntensity: 0.75, roughness: 0.35 }),
+      panels: [
+        makePanel(PanelMode.Radial, [ringOuter, ringInner], hueOffset),
+        makePanel(PanelMode.Stripes, sideHalf, hueOffset + 0.3),
+        makePanel(PanelMode.Stripes, sideHalf, hueOffset + 0.65)
+      ]
     };
-  }, [width, h, r, hueOffset]);
+  }, [w, h, d, bodyH, panelW, panelH, sideHalf, ringOuter, ringInner, hueOffset]);
 
   usePanels(parts.panels, controls);
-  const logo = useLogoMaterial();
-  const [ringPanel, sidePanel] = parts.panels;
+  const orangeInk = useLogoMaterial("orange");
+  const whiteInk = useLogoMaterial("white");
+  const rainbowInk = useLogoMaterial("rainbow");
+  const [ringLight, rightLight, leftLight] = parts.panels;
+  const top = h / 2;
+  const sideLogo = useMemo(() => logoPlane(panelW * 0.62), [panelW]);
 
   return (
     <group>
       <mesh geometry={parts.body} material={parts.fabric} castShadow />
-      <mesh material={parts.gloss} position={[0, h / 2 - 0.02, 0]}>
-        <cylinderGeometry args={[r - 0.04, r - 0.06, 0.06, 96]} />
+      <mesh geometry={parts.cap} material={parts.rubber} position-y={top - capH / 2} castShadow />
+      <mesh geometry={parts.cap} material={parts.rubber} position-y={-top + capH / 2} castShadow />
+
+      {/* Recessed light ring on the top end, around a dark disc with the wordmark. */}
+      <group position-y={top + 0.001}>
+        <mesh geometry={parts.recess} material={parts.gloss} />
+        <mesh geometry={parts.ring} material={ringLight} position-y={0.002} />
+        <mesh geometry={parts.disc} material={parts.gloss} position-y={0.004} />
+        <mesh geometry={parts.discLogo} material={whiteInk} position-y={0.006} />
+        <mesh geometry={parts.recess} material={parts.glass} position-y={0.008} />
+      </group>
+
+      {(
+        [
+          [1, rightLight],
+          [-1, leftLight]
+        ] as const
+      ).map(([side, light]) => (
+        <group key={side} position={[(side * w) / 2 - side * 0.012, 0, 0]} rotation={[0, (side * Math.PI) / 2, 0]}>
+          <mesh geometry={parts.frame} material={parts.glow} />
+          <mesh geometry={parts.bezel} material={parts.gloss} position-z={0.03} />
+          <mesh geometry={parts.light} material={light} position-z={0.032} />
+          <mesh geometry={sideLogo} material={rainbowInk} position-z={0.034} />
+          <mesh geometry={parts.light} material={parts.glass} position-z={0.036} />
+        </group>
+      ))}
+
+      <mesh material={orangeInk} position={[0, bodyH * 0.02, d / 2 + 0.004]}>
+        <primitive object={logoPlane(bodyH * 0.62, true)} attach="geometry" />
       </mesh>
-      <mesh geometry={parts.ringLight} material={ringPanel} position={[0, h / 2 + 0.012, 0]} />
-      <mesh material={parts.gloss} position={[0, -h / 2 + 0.01, 0]}>
-        <cylinderGeometry args={[r - 0.08, r - 0.1, 0.04, 96]} />
-      </mesh>
-      <mesh geometry={parts.frame} material={parts.glow} />
-      <mesh geometry={parts.bezel} material={parts.gloss} />
-      <mesh geometry={parts.panel} material={sidePanel} />
-      <mesh geometry={parts.logo} material={logo} />
-      {spec.strap && <mesh geometry={parts.strap} material={parts.strapMaterial} castShadow />}
+      <mesh geometry={parts.strap} material={parts.strapMaterial} castShadow />
     </group>
   );
 }
@@ -562,6 +746,6 @@ export function Speaker({
 }) {
   if (glbUrl) return <GlbSpeaker url={glbUrl} spec={spec} />;
   if (spec.shape === "puck") return <Puck spec={spec} controls={controls} hueOffset={hueOffset} />;
-  if (spec.shape === "cylinder") return <Cylinder spec={spec} controls={controls} hueOffset={hueOffset} />;
+  if (spec.shape === "cylinder") return <Column spec={spec} controls={controls} hueOffset={hueOffset} />;
   return <Prism spec={spec} controls={controls} hueOffset={hueOffset} />;
 }

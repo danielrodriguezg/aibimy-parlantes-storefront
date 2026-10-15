@@ -1,19 +1,32 @@
 /**
  * Static facts about each AIBIMY model that Shopify doesn't expose as structured fields.
  * Specs come from the product descriptions in Shopify; anything they mark as "no confirmada"
- * is null here and renders as "—". Dimensions are in decimeters (1 unit = 100 mm) and only
- * the MY362BT ones are published; the rest are estimated from the product photos.
+ * is null here and renders as "—". Dimensions are in decimeters (1 unit = 100 mm), taken from the
+ * manufacturer's dimension drawings; the MY262BT Pro has none published and is estimated from photos.
  */
 
 export type SpeakerShape = "puck" | "prism" | "cylinder";
+
+/** Visual details the procedural models need, read off the product photos. */
+export type SpeakerLook = {
+  /** puck: the back face is woven fabric or smooth plastic */
+  back?: "fabric" | "plastic";
+  /** puck: disc in the middle of the back RGB ring */
+  disc?: "brushed" | "gloss";
+  /** puck: power, volume and mode buttons on the top edge */
+  topButtons?: boolean;
+  /** puck: rubber cover over the ports, top of the back */
+  portFlap?: boolean;
+  /** prism: two orange cords with a black clip down the back */
+  cords?: boolean;
+};
 
 export type SpeakerSpec = {
   code: string;
   shape: SpeakerShape;
   /** width × height × depth in decimeters */
   size: [number, number, number];
-  /** carries a strap or cord (the photos show one on these models) */
-  strap: boolean;
+  look: SpeakerLook;
   powerW: number | null;
   bluetooth: string | null;
   autonomy: string | null;
@@ -30,8 +43,8 @@ export const CATALOG: Record<string, SpeakerSpec> = {
   "parlante-aibimy-my262bt-pro-bluetooth": {
     code: "MY262BT Pro",
     shape: "puck",
-    size: [1.15, 1.15, 0.6],
-    strap: true,
+    size: [1.12, 1.08, 0.56],
+    look: { back: "fabric", disc: "brushed", topButtons: true },
     powerW: 15,
     bluetooth: "5.0",
     autonomy: "Hasta 8 h",
@@ -45,8 +58,8 @@ export const CATALOG: Record<string, SpeakerSpec> = {
   "parlante-aibimy-my264bt-bluetooth-rgb": {
     code: "MY264BT",
     shape: "prism",
-    size: [1.1, 1.85, 0.85],
-    strap: false,
+    size: [1.16, 2.0, 0.68],
+    look: {},
     powerW: null,
     bluetooth: "Sí",
     autonomy: "Hasta 6 h",
@@ -60,8 +73,8 @@ export const CATALOG: Record<string, SpeakerSpec> = {
   "parlante-aibimy-my268bt-bluetooth-20w": {
     code: "MY268BT",
     shape: "cylinder",
-    size: [1.2, 2.0, 1.2],
-    strap: true,
+    size: [1.07, 2.01, 1.08],
+    look: {},
     powerW: 20,
     bluetooth: "5.3",
     autonomy: null,
@@ -76,7 +89,7 @@ export const CATALOG: Record<string, SpeakerSpec> = {
     code: "MY362BT",
     shape: "puck",
     size: [1.75, 1.77, 0.9],
-    strap: true,
+    look: { back: "plastic", disc: "gloss", portFlap: true },
     powerW: 30,
     bluetooth: "5.3",
     autonomy: "6 a 8 h",
@@ -90,8 +103,8 @@ export const CATALOG: Record<string, SpeakerSpec> = {
   "parlante-aibimy-my274bt-bluetooth-40w": {
     code: "MY274BT",
     shape: "prism",
-    size: [1.3, 2.35, 1.0],
-    strap: true,
+    size: [1.4, 2.4, 0.8],
+    look: { cords: true },
     powerW: 40,
     bluetooth: "Sí",
     autonomy: null,
@@ -110,8 +123,8 @@ export const FEATURED_HANDLE = "parlante-aibimy-my274bt-bluetooth-40w";
 const FALLBACK: SpeakerSpec = {
   code: "AIBIMY",
   shape: "prism",
-  size: [1.1, 1.85, 0.85],
-  strap: false,
+  size: [1.16, 2.0, 0.68],
+  look: {},
   powerW: null,
   bluetooth: null,
   autonomy: null,

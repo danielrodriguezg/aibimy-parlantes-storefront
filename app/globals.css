@@ -52,6 +52,14 @@ html.lenis body {
   border-radius: 4px;
 }
 
+/* The brand wordmark, set in the rounded logo face. */
+.wordmark {
+  font-family: var(--font-logo), var(--font-display), sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1;
+}
+
 /* Type scale: perfect fourth from 17px; headlines lowercase like the wordmark. */
 .display {
   font-family: var(--font-display);

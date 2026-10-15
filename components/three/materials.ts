@@ -1,34 +1,45 @@
 import * as THREE from "three";
 
 /*
- * Procedural materials for the speakers: woven fabric, rubber, plastic and the animated RGB panels.
- * Textures are generated once on the client and shared by every speaker on the page.
+ * Procedural materials for the speakers: knit fabric, rubber, plastic, glass and the animated RGB
+ * panels, plus the printed wordmark and button icons. Textures are generated once on the client
+ * and shared by every speaker on the page.
  */
 
-const WEAVE_SIZE = 256;
-const WEAVE_CELLS = 16;
+const KNIT_SIZE = 256;
+const KNIT_COLUMNS = 16;
 
-let weaveNormal: THREE.DataTexture | null = null;
+let knitNormal: THREE.DataTexture | null = null;
 
-/** Basket-weave height field turned into a tangent-space normal map. */
-function getWeaveNormal() {
-  if (weaveNormal) return weaveNormal;
+/**
+ * The speaker grille fabric: a fine knit with small round openings on a staggered grid, as in
+ * the close-up product shots. Built as a height field and turned into a tangent-space normal map.
+ */
+function getKnitNormal() {
+  if (knitNormal) return knitNormal;
 
-  const size = WEAVE_SIZE;
+  const size = KNIT_SIZE;
+  const pitch = size / KNIT_COLUMNS;
+  const rowPitch = pitch * 0.866;
+  const rows = Math.round(size / rowPitch);
   const height = new Float32Array(size * size);
-  const cell = size / WEAVE_CELLS;
   for (let y = 0; y < size; y++) {
     for (let x = 0; x < size; x++) {
-      const i = Math.floor(x / cell);
-      const j = Math.floor(y / cell);
-      const u = (x % cell) / cell;
-      const v = (y % cell) / cell;
-      // Alternate horizontal and vertical threads, two per cell, like the speaker mesh.
-      const across = (i + j) % 2 === 0;
-      const t = across ? (v * 2) % 1 : (u * 2) % 1;
-      const thread = Math.sin(Math.PI * t) ** 0.7;
-      const along = across ? u : v;
-      height[y * size + x] = thread * (0.8 + 0.2 * Math.cos(2 * Math.PI * along)) + (Math.random() - 0.5) * 0.06;
+      // Distance to the nearest opening on a hex lattice that tiles seamlessly.
+      let nearest = Infinity;
+      const row = Math.floor((y / size) * rows);
+      for (let dr = -1; dr <= 1; dr++) {
+        const r = row + dr;
+        const cy = ((r + 0.5) / rows) * size;
+        const shift = (((r % 2) + 2) % 2) * pitch * 0.5;
+        const col = Math.round((x - shift) / pitch);
+        for (let dc = -1; dc <= 1; dc++) {
+          const cx = (col + dc) * pitch + shift;
+          nearest = Math.min(nearest, Math.hypot(x - cx, y - cy));
+        }
+      }
+      const hole = Math.min(1, Math.max(0, (nearest - pitch * 0.2) / (pitch * 0.22)));
+      height[y * size + x] = hole * hole * (3 - 2 * hole) + (Math.random() - 0.5) * 0.05;
     }
   }
 
@@ -36,8 +47,8 @@ function getWeaveNormal() {
   const at = (x: number, y: number) => height[((y + size) % size) * size + ((x + size) % size)];
   for (let y = 0; y < size; y++) {
     for (let x = 0; x < size; x++) {
-      const dx = (at(x + 1, y) - at(x - 1, y)) * 2.2;
-      const dy = (at(x, y + 1) - at(x, y - 1)) * 2.2;
+      const dx = (at(x + 1, y) - at(x - 1, y)) * 1.6;
+      const dy = (at(x, y + 1) - at(x, y - 1)) * 1.6;
       const n = new THREE.Vector3(-dx, -dy, 1).normalize();
       const o = (y * size + x) * 4;
       data[o] = (n.x * 0.5 + 0.5) * 255;
@@ -54,47 +65,68 @@ function getWeaveNormal() {
   texture.generateMipmaps = true;
   texture.anisotropy = 8;
   texture.needsUpdate = true;
-  weaveNormal = texture;
+  knitNormal = texture;
   return texture;
 }
 
 /**
- * Black speaker fabric. `repeat` is how many weave tiles cover one UV unit; extruded and shape
- * geometries use world-space UVs (decimeters), so ~2.6 tiles ≈ 40 threads per 100 mm.
+ * Black speaker fabric. `repeat` is how many knit tiles cover one UV unit; extruded and shape
+ * geometries use world-space UVs (decimeters), so 3.2 tiles ≈ 50 openings per 100 mm.
  */
-export function makeFabric(repeatU = 2.6, repeatV = repeatU) {
-  const normalMap = getWeaveNormal().clone();
+export function makeFabric(repeatU = 3.2, repeatV = repeatU) {
+  const normalMap = getKnitNormal().clone();
   normalMap.repeat.set(repeatU, repeatV);
   return new THREE.MeshPhysicalMaterial({
-    color: "#141415",
-    roughness: 0.95,
+    color: "#17171a",
+    roughness: 0.9,
     normalMap,
-    normalScale: new THREE.Vector2(0.8, 0.8),
-    sheen: 1,
-    sheenRoughness: 0.55,
-    sheenColor: new THREE.Color("#3e3f44")
+    normalScale: new THREE.Vector2(0.5, 0.5),
+    sheen: 0.8,
+    sheenRoughness: 0.6,
+    sheenColor: new THREE.Color("#3a3b40")
   });
 }
+
+/** Black rubber: end caps, frames, feet. */
+export const rubberBlack = () =>
+  new THREE.MeshPhysicalMaterial({ color: "#121214", roughness: 0.55, clearcoat: 0.15, clearcoatRoughness: 0.5 });
 
 export const rubberOrange = () =>
   new THREE.MeshPhysicalMaterial({ color: "#ff5c00", roughness: 0.5, clearcoat: 0.25, clearcoatRoughness: 0.6 });
 
 export const glossBlack = () =>
-  new THREE.MeshPhysicalMaterial({ color: "#09090a", roughness: 0.22, clearcoat: 1, clearcoatRoughness: 0.12 });
+  new THREE.MeshPhysicalMaterial({ color: "#09090a", roughness: 0.2, clearcoat: 1, clearcoatRoughness: 0.1 });
 
-export const matteBlack = () => new THREE.MeshStandardMaterial({ color: "#131315", roughness: 0.62 });
+export const matteBlack = () => new THREE.MeshStandardMaterial({ color: "#151517", roughness: 0.68 });
 
 export const rope = () => new THREE.MeshStandardMaterial({ color: "#1b1b1e", roughness: 0.85 });
 
 export const metal = () => new THREE.MeshStandardMaterial({ color: "#8d9099", roughness: 0.35, metalness: 1 });
 
+/** Brushed aluminium disc, like the centre of the MY262BT Pro ring. */
+export const brushedMetal = () =>
+  new THREE.MeshPhysicalMaterial({ color: "#2b2c30", roughness: 0.32, metalness: 1, clearcoat: 0.6, clearcoatRoughness: 0.2 });
+
+/** Thin tinted glass laid over the light panels; it only adds reflections. */
+export const panelGlass = () =>
+  new THREE.MeshPhysicalMaterial({
+    color: "#000000",
+    roughness: 0.06,
+    metalness: 0,
+    clearcoat: 1,
+    clearcoatRoughness: 0.04,
+    transparent: true,
+    opacity: 0.28,
+    depthWrite: false
+  });
+
 /** How an RGB panel draws its light. */
 export enum PanelMode {
-  /** diagonal bars sweeping through the spectrum (side panels) */
+  /** two blocks of diagonal light bars with a gap for the logo (side panels) */
   Stripes = 0,
-  /** concentric rounded rings, "infinity mirror" (top of the prisms) */
+  /** "infinity mirror": rounded rings receding toward a dark centre (top panels) */
   Rings = 1,
-  /** hue follows the angle around the center (ring lights) */
+  /** colour sweeping around a ring (end caps, puck backs) */
   Radial = 2
 }
 
@@ -125,29 +157,35 @@ const panelFragment = /* glsl */ `
   }
 
   void main() {
-    // Shape geometries carry world-space UVs; normalize to -1..1 across the panel.
-    vec2 p = vUv / uHalf;
-    float hue;
-    float lit = 1.0;
+    // Shape geometries carry world-space UVs (decimeters), centred on the panel.
+    vec2 q = vUv;
+    vec2 p = q / uHalf;
+    vec3 glass = vec3(0.012, 0.012, 0.016);
+    vec3 light = vec3(0.0);
 
     if (uMode < 0.5) {
-      hue = p.y * 0.35 + uTime * 0.07 + uHue;
-      float bars = fract((p.x * 0.55 + p.y) * 4.5 - uTime * 0.35);
-      lit = smoothstep(0.0, 0.1, bars) * smoothstep(0.62, 0.5, bars);
-      lit = mix(0.05, 1.0, lit);
+      // Thin diagonal bars in two blocks, white-hot cores tinted by a slow rainbow.
+      float block = smoothstep(0.24, 0.3, abs(p.y)) * (1.0 - smoothstep(0.86, 0.94, abs(p.y)));
+      float bars = fract((q.x * 0.9 + q.y) * 16.0 - uTime * 0.25);
+      float line = smoothstep(0.0, 0.06, bars) * smoothstep(0.26, 0.16, bars);
+      vec3 tint = hsv2rgb(vec3(fract(p.y * 0.45 + q.x * 0.6 + uTime * 0.06 + uHue), 0.85, 1.0));
+      light = mix(tint, vec3(1.0), 0.12) * line * block;
     } else if (uMode < 1.5) {
-      float d = sdRoundBox(p, vec2(1.0), 0.55);
-      hue = d * 0.45 + atan(p.y, p.x) / 6.2831 * 0.3 + uTime * 0.07 + uHue;
-      float rings = fract(d * 3.2 + uTime * 0.25);
-      lit = mix(0.08, 1.0, smoothstep(0.0, 0.08, rings) * smoothstep(0.5, 0.38, rings));
-      lit *= smoothstep(0.02, -0.08, d);
+      // Infinity mirror: bright rounded rings, dimmer and tighter toward the centre.
+      float r = min(uHalf.x, uHalf.y);
+      float d = sdRoundBox(q, uHalf, r);
+      float depth = clamp(-d / r, 0.0, 1.0);
+      float rings = fract(depth * 5.0 - uTime * 0.3);
+      float line = smoothstep(0.0, 0.1, rings) * smoothstep(0.32, 0.18, rings);
+      float hue = atan(q.y, q.x) / 6.2831 + depth * 0.4 + uTime * 0.06 + uHue;
+      light = hsv2rgb(vec3(fract(hue), 0.8, 1.0)) * line * (1.0 - depth * 0.85);
     } else {
-      hue = atan(p.y, p.x) / 6.2831 + uTime * 0.07 + uHue;
+      // A ring of light: geometry gives the shape, colour sweeps around it.
+      float hue = atan(q.y, q.x) / 6.2831 + uTime * 0.08 + uHue;
+      light = hsv2rgb(vec3(fract(hue), 0.95, 1.0));
     }
 
-    vec3 color = hsv2rgb(vec3(fract(hue), 0.82, 1.0));
-    // Above 1.0 so the panels read as light sources, not paint.
-    gl_FragColor = vec4(color * lit * uPower * 1.6, 1.0);
+    gl_FragColor = vec4(glass + light * uPower * 1.7, 1.0);
     #include <colorspace_fragment>
   }
 `;
@@ -171,26 +209,112 @@ export function makePanel(mode: PanelMode, half: [number, number], hueOffset = 0
 /** Hue a panel is showing at `time`, so the DOM glow can match the 3D light. */
 export const panelHue = (time: number, hueOffset = 0) => (time * 0.07 + hueOffset) % 1;
 
+/** How the wordmark is printed: orange ink on fabric, white on dark discs, rainbow behind glass. */
+export type LogoInk = "orange" | "white" | "rainbow";
+
 const logoCache = new Map<string, THREE.CanvasTexture>();
 
-/** The lowercase "aibimy" wordmark, printed in rubber orange on a transparent texture. */
-export function getLogoTexture(fontFamily: string) {
-  const cached = logoCache.get(fontFamily);
+/** The lowercase "aibimy" wordmark on a transparent 4:1 texture. */
+export function getLogoTexture(fontFamily: string, ink: LogoInk = "orange") {
+  const key = `${fontFamily}|${ink}`;
+  const cached = logoCache.get(key);
   if (cached) return cached;
 
   const canvas = document.createElement("canvas");
   canvas.width = 1024;
   canvas.height = 256;
   const context = canvas.getContext("2d")!;
-  context.fillStyle = "#ff6b00";
-  context.font = `600 168px ${fontFamily}`;
+  if (ink === "rainbow") {
+    const gradient = context.createLinearGradient(160, 0, 864, 0);
+    ["#ff4d4d", "#ffb02e", "#f5f749", "#3dfc8b", "#38c8ff", "#8a63ff", "#ff5ad1"].forEach((color, i, all) =>
+      gradient.addColorStop(i / (all.length - 1), color)
+    );
+    context.fillStyle = gradient;
+  } else {
+    // The printed orange is deeper than the screen brand colour once lit.
+    context.fillStyle = ink === "white" ? "#f4f4f6" : "#f25a00";
+  }
+  context.font = `700 190px ${fontFamily}`;
   context.textAlign = "center";
   context.textBaseline = "middle";
-  context.fillText("aibimy", 512, 140);
+  context.fillText("aibimy", 512, 128);
 
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
   texture.anisotropy = 8;
-  logoCache.set(fontFamily, texture);
+  logoCache.set(key, texture);
+  return texture;
+}
+
+/** Which row of moulded button symbols to draw. */
+export type IconRow = "transport" | "top";
+
+const iconCache = new Map<IconRow, THREE.CanvasTexture>();
+
+/**
+ * Button symbols moulded into the rubber: ◁ ⏻ ▷ ▷| on the prisms' front pill, ⏻ − + M on top
+ * of the MY262BT Pro. Drawn as strokes in a grey a shade lighter than the rubber.
+ */
+export function getIconTexture(row: IconRow) {
+  const cached = iconCache.get(row);
+  if (cached) return cached;
+
+  const canvas = document.createElement("canvas");
+  canvas.width = 1024;
+  canvas.height = 256;
+  const c = canvas.getContext("2d")!;
+  c.strokeStyle = "#6a6b72";
+  c.fillStyle = "#6a6b72";
+  c.lineWidth = 16;
+  c.lineCap = "round";
+  c.lineJoin = "round";
+
+  const power = (x: number) => {
+    c.beginPath();
+    c.arc(x, 132, 46, -Math.PI * 0.32, Math.PI * 1.32);
+    c.stroke();
+    c.beginPath();
+    c.moveTo(x, 72);
+    c.lineTo(x, 128);
+    c.stroke();
+  };
+  const triangle = (x: number, dir: 1 | -1) => {
+    c.beginPath();
+    c.moveTo(x - 30 * dir, 84);
+    c.lineTo(x + 34 * dir, 128);
+    c.lineTo(x - 30 * dir, 172);
+    c.closePath();
+    c.stroke();
+  };
+
+  if (row === "transport") {
+    triangle(160, -1);
+    power(400);
+    triangle(632, 1);
+    triangle(850, 1);
+    c.beginPath();
+    c.moveTo(904, 84);
+    c.lineTo(904, 172);
+    c.stroke();
+  } else {
+    power(150);
+    c.beginPath();
+    c.moveTo(330, 128);
+    c.lineTo(430, 128);
+    c.moveTo(600, 128);
+    c.lineTo(700, 128);
+    c.moveTo(650, 78);
+    c.lineTo(650, 178);
+    c.stroke();
+    c.font = "700 120px sans-serif";
+    c.textAlign = "center";
+    c.textBaseline = "middle";
+    c.fillText("M", 880, 132);
+  }
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.anisotropy = 8;
+  iconCache.set(row, texture);
   return texture;
 }
