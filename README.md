@@ -4,7 +4,7 @@ Tienda headless en Next.js (App Router + Tailwind) para los parlantes AIBIMY pub
 
 ## Cómo funciona
 
-- Los productos se leen de la Storefront API de Shopify con la búsqueda `SHOPIFY_PRODUCT_QUERY` (por defecto `title:AIBIMY`).
+- Los productos se leen de la Storefront API de Shopify con la búsqueda `SHOPIFY_PRODUCT_QUERY` (por defecto `vendor:Aibimy AND product_type:Parlantes`).
 - El carrito vive en el navegador. Al pagar, `/api/checkout` valida las variantes contra Shopify, crea un carrito con `cartCreate` y redirige al checkout de Shopify.
 - El pedido queda en Shopify como cualquier otro, así que Dropi lo recibe sin cambios.
 

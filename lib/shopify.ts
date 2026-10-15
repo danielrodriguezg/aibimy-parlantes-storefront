@@ -2,7 +2,7 @@ import "server-only";
 import type { CartLine, Product, ProductImage, ProductVariant } from "@/lib/types";
 
 const DEFAULT_API_VERSION = "2025-07";
-const DEFAULT_PRODUCT_QUERY = "title:AIBIMY";
+const DEFAULT_PRODUCT_QUERY = "vendor:Aibimy AND product_type:Parlantes";
 const DEFAULT_REVALIDATE_SECONDS = 300;
 export const MAX_LINE_QUANTITY = 20;
 
