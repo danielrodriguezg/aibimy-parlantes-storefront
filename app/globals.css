@@ -1,20 +1,134 @@
 @import "tailwindcss";
 
+/* Tokens: see docs/direccion-de-arte.md */
+@theme {
+  --color-escenario: #000000;
+  --color-tela: #1c1d21;
+  --color-dia: #e8e9ed;
+  --color-niebla: #8b8e97;
+  --color-blanco: #f5f6f8;
+  --color-caucho: #ff6b00;
+  --color-caucho-hondo: #e25a00;
+
+  --font-display: var(--font-unbounded), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-onest), ui-sans-serif, system-ui, sans-serif;
+}
+
 :root {
-  color-scheme: light;
+  color-scheme: dark;
+  --glow-h: 25;
+  --glow-a: 0;
+}
+
+html {
+  background: var(--color-escenario);
 }
 
 body {
-  background: #fafaf9;
-  color: #0a0a0a;
+  /* clip, not hidden: keeps position: sticky working for the night chapters */
+  overflow-x: clip;
+  background: var(--color-escenario);
+  color: var(--color-blanco);
+  font-family: var(--font-sans);
+  font-size: 1.0625rem;
+  line-height: 1.6;
+}
+
+/* Lenis */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-caucho);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* Type scale: perfect fourth from 17px; headlines lowercase like the wordmark. */
+.display {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+}
+.display-xl {
+  font-size: clamp(3rem, 9.2vw, 10rem);
+  line-height: 0.9;
+}
+.display-l {
+  font-size: clamp(2.3rem, 5.4vw, 5.9rem);
+  line-height: 0.96;
+}
+.display-m {
+  font-size: clamp(1.75rem, 3.2vw, 3.3rem);
+  line-height: 1.02;
+}
+.display-s {
+  font-size: clamp(1.35rem, 1.9vw, 1.875rem);
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+}
+.lede {
+  font-size: clamp(1.0625rem, 1.3vw, 1.4375rem);
+  line-height: 1.5;
+  max-width: 34ch;
+  text-wrap: pretty;
+}
+
+/* Day sections: studio light for comparing and buying. */
+.dia {
+  background: var(--color-dia);
+  color: var(--color-tela);
+  color-scheme: light;
+}
+
+/* The stage glow: light spilling from the speaker's RGB panels, hue set from the 3D scene. */
+.stage-glow {
+  background:
+    radial-gradient(42% 48% at var(--glow-x, 68%) 56%, hsl(var(--glow-h) 92% 56% / calc(var(--glow-a) * 0.42)), transparent 72%),
+    radial-gradient(70% 40% at var(--glow-x, 68%) 100%, hsl(var(--glow-h) 92% 50% / calc(var(--glow-a) * 0.18)), transparent 70%);
+}
+@media (max-aspect-ratio: 17/20) {
+  .stage-glow {
+    --glow-x: 50%;
+  }
+}
+
+/* Without WebGL each 3D region shows the product photo it would otherwise render. */
+.webgl-fallback {
+  display: none;
+}
+html[data-webgl="off"] .webgl-fallback {
+  display: block;
 }
 
 .product-description p {
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.9rem;
 }
-
 .product-description ul {
   list-style: disc;
   padding-left: 1.25rem;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.9rem;
+}
+.product-description strong,
+.product-description h2,
+.product-description h3 {
+  font-weight: 600;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
 }
