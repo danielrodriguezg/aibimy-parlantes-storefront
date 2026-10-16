@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
+import { OrnamentLayer } from "@/components/three/ornament-layer";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AddToCart } from "@/components/add-to-cart";
-import { ProductStage } from "@/components/product/product-stage";
+import { ProductGallery } from "@/components/product/product-gallery";
 import { bySize, getSpec } from "@/lib/catalog";
 import { formatMoney } from "@/lib/money";
-import { glbUrlFor } from "@/lib/models";
+import { photosFor, type ViewPhoto } from "@/lib/product-photos";
 import { getProductByHandle, getProducts } from "@/lib/shopify";
 
 type Params = { params: Promise<{ handle: string }> };
@@ -32,8 +33,18 @@ export default async function ProductPage({ params }: Params) {
   if (!product) notFound();
 
   const spec = getSpec(product.handle);
-  const glbUrl = glbUrlFor(product.handle);
   const images = product.images.length ? product.images : product.featuredImage ? [product.featuredImage] : [];
+  // Cut-out views when we have them; otherwise the Shopify photos as they are.
+  const cutouts = photosFor(product.handle);
+  const views: ViewPhoto[] = cutouts.length
+    ? cutouts
+    : images.slice(0, 4).map((image, i) => ({
+        src: image.url,
+        width: image.width,
+        height: image.height,
+        view: "front-34",
+        label: `Foto ${i + 1}`
+      }));
   const others = bySize(all).filter((other) => other.handle !== product.handle);
 
   const facts = [
@@ -69,7 +80,8 @@ export default async function ProductPage({ params }: Params) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData).replace(/</g, "\\u003c") }}
       />
 
-      <section className="px-5 pt-24 pb-20 sm:px-10">
+      <section className="relative px-5 pt-24 pb-20 sm:px-10">
+        <OrnamentLayer variant="night" />
         <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:items-center">
           <div className="order-2 flex flex-col gap-7 lg:order-1">
             <Link href="/#linea" className="text-sm text-niebla hover:text-blanco">
@@ -88,18 +100,13 @@ export default async function ProductPage({ params }: Params) {
           </div>
 
           <div className="order-1 lg:order-2">
-            <ProductStage
-              handle={product.handle}
-              glbUrl={glbUrl}
-              canOpen={spec.shape === "prism" && !glbUrl}
-              fallbackImage={product.featuredImage?.url ?? null}
-              alt={product.title}
-            />
+            <ProductGallery photos={views} title={product.title} />
           </div>
         </div>
       </section>
 
-      <section className="dia px-5 py-24 sm:px-10">
+      <section className="dia relative px-5 py-24 sm:px-10">
+        <OrnamentLayer variant="day" />
         <div className="mx-auto grid max-w-7xl gap-14 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)]">
           <div>
             <h2 className="display display-m">lo que trae.</h2>
@@ -123,7 +130,8 @@ export default async function ProductPage({ params }: Params) {
       </section>
 
       {images.length > 0 && (
-        <section className="dia border-t border-tela/10 px-5 py-24 sm:px-10">
+        <section className="dia relative border-t border-tela/10 px-5 py-24 sm:px-10">
+          <OrnamentLayer variant="day" />
           <div className="mx-auto max-w-7xl">
             <h2 className="display display-m mb-10">en fotos.</h2>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -144,7 +152,8 @@ export default async function ProductPage({ params }: Params) {
       )}
 
       {others.length > 0 && (
-        <section className="px-5 py-24 sm:px-10">
+        <section className="relative px-5 py-24 sm:px-10">
+          <OrnamentLayer variant="night" />
           <div className="mx-auto max-w-7xl">
             <h2 className="display display-m mb-8">los otros modelos.</h2>
             <ul className="divide-y divide-white/10 border-y border-white/10">

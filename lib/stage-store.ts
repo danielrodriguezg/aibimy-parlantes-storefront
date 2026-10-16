@@ -11,7 +11,13 @@ export const stage = {
   power: 0,
   reducedMotion: false,
   /** pointer position in -1..1, for a subtle parallax on the stage */
-  pointer: { x: 0, y: 0 }
+  pointer: { x: 0, y: 0 },
+  /** 0..1 progress through the whole page, from Lenis */
+  scroll: 0,
+  /** Lenis scroll velocity (px per frame, signed); ornaments stir with it */
+  velocity: 0,
+  /** true while the home's night chapters drive `hue` and `power`; otherwise the ornaments do */
+  chaptersActive: false
 };
 
 /** The night chapters, in scroll order. Each one owns an equal slice of `stage.night`. */

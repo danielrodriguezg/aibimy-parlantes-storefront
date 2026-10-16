@@ -1,10 +1,20 @@
 import Link from "next/link";
+import { OrnamentLayer } from "@/components/three/ornament-layer";
 import { Lineup, type LineupItem } from "@/components/home/lineup";
 import { NightChapters } from "@/components/home/night-chapters";
 import { FEATURED_HANDLE, bySize, getSpec, type SpeakerSpec } from "@/lib/catalog";
 import { formatMoney } from "@/lib/money";
-import { glbUrlFor } from "@/lib/models";
+import { altPhoto, heroPhoto, photosFor, type ViewPhoto } from "@/lib/product-photos";
 import { getProducts, isShopifyConfigured } from "@/lib/shopify";
+import type { Product } from "@/lib/types";
+
+/** The cutout for a product, or its Shopify photo for products added after the cutouts were made. */
+function mainPhoto(product: Product): ViewPhoto | null {
+  const cutout = heroPhoto(product.handle);
+  if (cutout) return cutout;
+  const image = product.featuredImage;
+  return image ? { src: image.url, width: image.width, height: image.height, view: "front-34", label: "Foto" } : null;
+}
 
 type Row = { label: string; value: (spec: SpeakerSpec) => string | null };
 
@@ -31,8 +41,9 @@ export default async function HomePage() {
       powerW: spec.powerW,
       price: formatMoney(product.priceRange.minVariantPrice),
       summary: spec.summary,
-      image: product.featuredImage?.url ?? null,
-      glbUrl: glbUrlFor(product.handle),
+      height: spec.size[1],
+      photo: mainPhoto(product),
+      alt: altPhoto(product.handle),
       available: product.availableForSale
     };
   });
@@ -40,17 +51,17 @@ export default async function HomePage() {
   return (
     <main>
       <NightChapters
-        handle={featured?.handle ?? FEATURED_HANDLE}
-        glbUrl={glbUrlFor(featured?.handle ?? FEATURED_HANDLE)}
-        fallbackImage={featured?.featuredImage?.url ?? null}
+        front={featured ? mainPhoto(featured) : null}
+        back={photosFor(featured?.handle ?? FEATURED_HANDLE).find((photo) => photo.view === "back") ?? null}
       />
 
-      <section id="linea" className="dia scroll-mt-16 px-5 pt-28 pb-24 sm:px-10">
+      <section id="linea" className="dia relative scroll-mt-16 px-5 pt-28 pb-24 sm:px-10">
+        <OrnamentLayer variant="day" />
         <div className="mx-auto max-w-7xl">
           <div className="mb-14 grid gap-6 md:grid-cols-[1fr_auto] md:items-end">
             <h2 className="display display-l max-w-[12ch]">del bolsillo a la fiesta.</h2>
             <p className="lede text-tela/70">
-              Los cinco modelos, del más pequeño al más grande, a escala aproximada. Pasa el cursor para ver sus luces.
+              Los cinco modelos, del más pequeño al más grande, a escala con las medidas del fabricante. Pasa el cursor para verlos desde otro ángulo.
             </p>
           </div>
 
@@ -67,7 +78,8 @@ export default async function HomePage() {
       </section>
 
       {products.length > 1 && (
-        <section id="comparar" className="dia scroll-mt-16 border-t border-tela/10 px-5 py-24 sm:px-10">
+        <section id="comparar" className="dia relative scroll-mt-16 border-t border-tela/10 px-5 py-24 sm:px-10">
+          <OrnamentLayer variant="day" />
           <div className="mx-auto max-w-7xl">
             <h2 className="display display-m mb-10">compáralos.</h2>
             {/* contain: paint stops mobile Chrome from widening the page to the table's scroll width */}
@@ -128,7 +140,8 @@ export default async function HomePage() {
         </section>
       )}
 
-      <section className="px-5 py-28 sm:px-10">
+      <section className="relative px-5 py-28 sm:px-10">
+        <OrnamentLayer variant="night" />
         <div className="mx-auto grid max-w-7xl gap-12 md:grid-cols-2 md:items-end">
           <h2 className="display display-l max-w-[11ch]">llega a tu puerta.</h2>
           <div className="grid gap-8">

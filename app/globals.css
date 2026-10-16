@@ -52,6 +52,14 @@ html.lenis body {
   border-radius: 4px;
 }
 
+/* The brand wordmark, set in the rounded logo face. */
+.wordmark {
+  font-family: var(--font-logo), var(--font-display), sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1;
+}
+
 /* Type scale: perfect fourth from 17px; headlines lowercase like the wordmark. */
 .display {
   font-family: var(--font-display);
@@ -89,6 +97,10 @@ html.lenis body {
   color: var(--color-tela);
   color-scheme: light;
 }
+/* With the ornament canvas running, it paints the daylight behind these sections. */
+.has-ornaments .dia {
+  background: transparent;
+}
 
 /* The stage glow: light spilling from the speaker's RGB panels, hue set from the 3D scene. */
 .stage-glow {
@@ -102,12 +114,36 @@ html.lenis body {
   }
 }
 
-/* Without WebGL each 3D region shows the product photo it would otherwise render. */
-.webgl-fallback {
-  display: none;
+/* Product cutouts: a slow float, and a soft contact shadow that tightens as they rise. */
+@keyframes float {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(0, -14px, 0);
+  }
 }
-html[data-webgl="off"] .webgl-fallback {
-  display: block;
+@keyframes shadow-breathe {
+  from {
+    transform: scaleX(1);
+    opacity: 0.55;
+  }
+  to {
+    transform: scaleX(0.86);
+    opacity: 0.38;
+  }
+}
+.float {
+  animation: float 4.2s ease-in-out infinite alternate;
+}
+.contact-shadow {
+  background: radial-gradient(closest-side, rgb(0 0 0 / 0.85), transparent);
+  filter: blur(6px);
+  animation: shadow-breathe 4.2s ease-in-out infinite alternate;
+}
+.dia .contact-shadow {
+  background: radial-gradient(closest-side, rgb(28 29 33 / 0.45), transparent);
+  animation: none;
 }
 
 .product-description p {
@@ -125,6 +161,10 @@ html[data-webgl="off"] .webgl-fallback {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .float,
+  .contact-shadow {
+    animation: none;
+  }
   *,
   *::before,
   *::after {
