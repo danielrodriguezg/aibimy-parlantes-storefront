@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { OrnamentLayer } from "@/components/three/ornament-layer";
 import { Comfortaa, Onest, Unbounded } from "next/font/google";
 import Link from "next/link";
 import { CartDrawer } from "@/components/cart-drawer";
@@ -32,8 +33,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <SiteHeader />
           {children}
           <CartDrawer />
-          <footer className="border-t border-white/10 bg-escenario px-5 py-12 text-sm text-niebla sm:px-10">
-            <div className="mx-auto flex max-w-7xl flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+          <footer className="relative border-t border-white/10 px-5 py-12 text-sm text-niebla sm:px-10">
+            <OrnamentLayer variant="night" />
+            <div className="relative mx-auto flex max-w-7xl flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
               <p className="wordmark text-2xl text-caucho">aibimy</p>
               <nav aria-label="Pie de página" className="flex flex-wrap gap-x-6 gap-y-2">
                 <Link href="/#linea" className="hover:text-blanco">

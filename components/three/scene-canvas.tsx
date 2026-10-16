@@ -1,8 +1,8 @@
 "use client";
 
 import { PerformanceMonitor, View } from "@react-three/drei";
-import { Canvas } from "@react-three/fiber";
-import { useState } from "react";
+import { Canvas, useFrame } from "@react-three/fiber";
+import { useEffect, useRef, useState } from "react";
 
 /**
  * One WebGL canvas for the whole site, used only for the abstract ornaments. Every ornament
@@ -10,6 +10,21 @@ import { useState } from "react";
  * content (which is positioned above it in the layout), so ornaments never cover photos or copy.
  * Views that are off screen are skipped, so scrolled-away sections cost nothing.
  */
+/**
+ * Once the canvas has drawn, it takes over painting the daylight sections' background
+ * (`has-ornaments` makes their CSS background transparent); until then, and without WebGL, CSS does.
+ */
+function MarkReady() {
+  const done = useRef(false);
+  useFrame(() => {
+    if (done.current) return;
+    done.current = true;
+    document.documentElement.classList.add("has-ornaments");
+  });
+  useEffect(() => () => document.documentElement.classList.remove("has-ornaments"), []);
+  return null;
+}
+
 export default function SceneCanvas() {
   const [dpr, setDpr] = useState(1.5);
 
@@ -23,6 +38,7 @@ export default function SceneCanvas() {
       style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 0 }}
     >
       <PerformanceMonitor onDecline={() => setDpr(1)} onIncline={() => setDpr(1.5)} />
+      <MarkReady />
       <View.Port />
     </Canvas>
   );

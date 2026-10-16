@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { OrnamentLayer } from "@/components/three/ornament-layer";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -79,7 +80,8 @@ export default async function ProductPage({ params }: Params) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData).replace(/</g, "\\u003c") }}
       />
 
-      <section className="px-5 pt-24 pb-20 sm:px-10">
+      <section className="relative px-5 pt-24 pb-20 sm:px-10">
+        <OrnamentLayer variant="night" />
         <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:items-center">
           <div className="order-2 flex flex-col gap-7 lg:order-1">
             <Link href="/#linea" className="text-sm text-niebla hover:text-blanco">
@@ -103,7 +105,8 @@ export default async function ProductPage({ params }: Params) {
         </div>
       </section>
 
-      <section className="dia px-5 py-24 sm:px-10">
+      <section className="dia relative px-5 py-24 sm:px-10">
+        <OrnamentLayer variant="day" />
         <div className="mx-auto grid max-w-7xl gap-14 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)]">
           <div>
             <h2 className="display display-m">lo que trae.</h2>
@@ -127,7 +130,8 @@ export default async function ProductPage({ params }: Params) {
       </section>
 
       {images.length > 0 && (
-        <section className="dia border-t border-tela/10 px-5 py-24 sm:px-10">
+        <section className="dia relative border-t border-tela/10 px-5 py-24 sm:px-10">
+          <OrnamentLayer variant="day" />
           <div className="mx-auto max-w-7xl">
             <h2 className="display display-m mb-10">en fotos.</h2>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -148,7 +152,8 @@ export default async function ProductPage({ params }: Params) {
       )}
 
       {others.length > 0 && (
-        <section className="px-5 py-24 sm:px-10">
+        <section className="relative px-5 py-24 sm:px-10">
+          <OrnamentLayer variant="night" />
           <div className="mx-auto max-w-7xl">
             <h2 className="display display-m mb-8">los otros modelos.</h2>
             <ul className="divide-y divide-white/10 border-y border-white/10">

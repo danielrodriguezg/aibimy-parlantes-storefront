@@ -97,6 +97,10 @@ html.lenis body {
   color: var(--color-tela);
   color-scheme: light;
 }
+/* With the ornament canvas running, it paints the daylight behind these sections. */
+.has-ornaments .dia {
+  background: transparent;
+}
 
 /* The stage glow: light spilling from the speaker's RGB panels, hue set from the 3D scene. */
 .stage-glow {

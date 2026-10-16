@@ -112,6 +112,7 @@ export function NightChapters({ front, back }: { front: ViewPhoto | null; back: 
       }
     });
 
+    stage.chaptersActive = true;
     const startedAt = performance.now();
     const current = poseAt(stage.night);
     let frame = 0;
@@ -171,6 +172,7 @@ export function NightChapters({ front, back }: { front: ViewPhoto | null; back: 
     return () => {
       cancelAnimationFrame(frame);
       trigger.kill();
+      stage.chaptersActive = false;
     };
   }, []);
 

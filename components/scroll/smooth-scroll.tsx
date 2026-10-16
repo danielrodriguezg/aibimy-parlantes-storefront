@@ -28,7 +28,12 @@ export function SmoothScroll() {
     }
 
     const lenis = new Lenis({ lerp: 0.1, anchors: { offset: -72 } });
-    lenis.on("scroll", ScrollTrigger.update);
+    lenis.on("scroll", (instance: Lenis) => {
+      // One scroll progress feeds both ScrollTrigger and the ornament canvas.
+      stage.scroll = instance.progress;
+      stage.velocity = instance.velocity;
+      ScrollTrigger.update();
+    });
     const tick = (time: number) => lenis.raf(time * 1000);
     gsap.ticker.add(tick);
     gsap.ticker.lagSmoothing(0);
