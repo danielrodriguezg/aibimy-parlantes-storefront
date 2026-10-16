@@ -97,8 +97,18 @@ html.lenis body {
   color: var(--color-tela);
   color-scheme: light;
 }
+/* Studio seamless for the product page hero: lighter than daylight, the photo is the subject. */
+.estudio {
+  background: #f5f5f7;
+  color: var(--color-tela);
+  color-scheme: light;
+}
+.estudio .contact-shadow {
+  background: radial-gradient(closest-side, rgb(0 0 0 / 0.32), transparent);
+}
 /* With the ornament canvas running, it paints the daylight behind these sections. */
-.has-ornaments .dia {
+.has-ornaments .dia,
+.has-ornaments .estudio {
   background: transparent;
 }
 
@@ -112,6 +122,28 @@ html.lenis body {
   .stage-glow {
     --glow-x: 50%;
   }
+}
+
+/* Refined stage (night): overhead light on the product, a thin rim of light and side glows in
+   the speaker's current RGB colour, and a glossy floor that mirrors it. */
+.stage-toplight {
+  background: radial-gradient(34% 58% at var(--glow-x, 68%) -6%, rgb(255 255 255 / 0.11), transparent 72%);
+}
+.rim-light {
+  filter: drop-shadow(0 0 1px rgb(255 255 255 / 0.5)) drop-shadow(-16px 0 26px hsl(var(--glow-h, 25) 90% 55% / 0.32))
+    drop-shadow(16px -6px 28px hsl(calc(var(--glow-h, 25) + 160) 85% 60% / 0.26)) drop-shadow(0 30px 40px rgb(0 0 0 / 0.55));
+}
+/* A copy of the photo mirrored about its bottom edge, fading out quickly below the contact line. */
+.floor-reflection {
+  position: absolute;
+  inset: 0;
+  transform: scaleY(-1);
+  transform-origin: bottom;
+  opacity: 0.2;
+  filter: blur(1px);
+  mask-image: linear-gradient(to top, black, transparent 32%);
+  -webkit-mask-image: linear-gradient(to top, black, transparent 32%);
+  pointer-events: none;
 }
 
 /* Product cutouts: a slow float, and a soft contact shadow that tightens as they rise. */

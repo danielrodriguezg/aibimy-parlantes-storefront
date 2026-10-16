@@ -1,11 +1,8 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useRef, useState } from "react";
 import type { ViewPhoto } from "@/lib/product-photos";
-
-const Ornaments = dynamic(() => import("@/components/three/ornaments"), { ssr: false });
 
 const ZOOM = 2.2;
 
@@ -34,8 +31,6 @@ export function ProductGallery({ photos, title }: { photos: ViewPhoto[]; title: 
 
   return (
     <div className="relative">
-      <Ornaments variant="product" />
-
       <div
         className={`relative aspect-square touch-pan-y select-none [perspective:1400px] ${
           zoomed ? "cursor-zoom-out" : "cursor-zoom-in"
@@ -57,7 +52,7 @@ export function ProductGallery({ photos, title }: { photos: ViewPhoto[]; title: 
       >
         <div
           className="pointer-events-none absolute inset-[10%] rounded-full opacity-70 blur-3xl"
-          style={{ background: "radial-gradient(closest-side, rgb(255 107 0 / 0.2), transparent)" }}
+          style={{ background: "radial-gradient(closest-side, rgb(255 107 0 / 0.07), transparent)" }}
           aria-hidden
         />
         <div className="contact-shadow absolute bottom-[6%] left-1/2 h-[5%] w-1/2 -translate-x-1/2" aria-hidden />
@@ -85,8 +80,11 @@ export function ProductGallery({ photos, title }: { photos: ViewPhoto[]; title: 
                   fill
                   priority={index === 0}
                   sizes="(min-width: 1024px) 50vw, 100vw"
-                  className="object-contain drop-shadow-[0_30px_40px_rgba(0,0,0,0.55)]"
+                  className="object-contain drop-shadow-[0_24px_28px_rgba(0,0,0,0.16)]"
                 />
+                <div className="floor-reflection" style={{ opacity: 0.12 }} aria-hidden>
+                  <Image src={photo.src} alt="" fill sizes="(min-width: 1024px) 50vw, 100vw" className="object-contain" />
+                </div>
               </div>
             );
           })}
@@ -103,8 +101,8 @@ export function ProductGallery({ photos, title }: { photos: ViewPhoto[]; title: 
                 aria-pressed={index === active}
                 aria-label={`Ver ${photo.label.toLowerCase()}`}
                 onClick={() => select(index)}
-                className={`relative h-16 w-16 rounded-xl border bg-white/5 transition-colors ${
-                  index === active ? "border-blanco" : "border-white/15 hover:border-white/50"
+                className={`relative h-16 w-16 rounded-xl border bg-white transition-colors ${
+                  index === active ? "border-tela" : "border-tela/10 hover:border-tela/40"
                 }`}
               >
                 <Image src={photo.src} alt="" fill sizes="64px" className="object-contain p-1.5" />
@@ -117,11 +115,11 @@ export function ProductGallery({ photos, title }: { photos: ViewPhoto[]; title: 
           aria-pressed={zoomed}
           onClick={() => setZoomed((value) => !value)}
           onKeyDown={(event) => event.key === "Escape" && setZoomed(false)}
-          className="rounded-full border border-white/20 px-4 py-2 text-sm transition-colors hover:border-white/50"
+          className="rounded-full border border-tela/20 px-4 py-2 text-sm transition-colors hover:border-tela/50"
         >
           {zoomed ? "Reducir" : "Ampliar"}
         </button>
-        <span className="text-sm text-niebla">
+        <span className="text-sm text-tela/55">
           {photos.length > 1 ? "Toca la foto para ampliar, desliza para girar" : "Toca la foto para ampliar"}
         </span>
       </div>

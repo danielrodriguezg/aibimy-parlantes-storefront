@@ -15,14 +15,17 @@ import { chapterWeight, stage } from "@/lib/stage-store";
  *
  * Variants: "home" (night chapters), "product" (gallery), "night" (any dark section) and "day"
  * (the light compare/buy sections: the canvas paints the daylight background itself and the
- * ornaments switch to a quiet, ink-toned version).
+ * ornaments switch to a quiet, ink-toned version), plus "studio" (the product page hero: a lighter
+ * seamless with only soft orbs and dust, so the product photo stays the subject).
  */
 
-type Variant = "home" | "product" | "night" | "day";
+type Variant = "home" | "product" | "night" | "day" | "studio";
 type Tone = "night" | "day";
 
 /** Daylight background, painted by the canvas behind day sections (same as --color-dia). */
 const DAY = "#e8e9ed";
+/** Studio seamless behind the product page hero (same as .estudio). */
+const STUDIO = "#f5f5f7";
 
 const additive = (opacity = 1) =>
   new THREE.MeshBasicMaterial({
@@ -489,7 +492,7 @@ function Scene({ variant }: { variant: Variant }) {
   const portrait = size.width / size.height < 0.85;
   const small = size.width < 700;
   const { width, height } = viewport;
-  const tone: Tone = variant === "day" ? "day" : "night";
+  const tone: Tone = variant === "day" || variant === "studio" ? "day" : "night";
 
   // Ring centre follows where the product photo sits on the page.
   const center: [number, number] =
@@ -497,7 +500,7 @@ function Scene({ variant }: { variant: Variant }) {
 
   return (
     <>
-      {tone === "day" && <color attach="background" args={[DAY]} />}
+      {tone === "day" && <color attach="background" args={[variant === "studio" ? STUDIO : DAY]} />}
       <PerspectiveCamera makeDefault fov={35} position={[0, 0, 10]} />
       <ambientLight intensity={0.6} />
       <directionalLight position={[3, 4, 5]} intensity={1.2} />
@@ -514,7 +517,7 @@ function Scene({ variant }: { variant: Variant }) {
         <SoundRings center={[width * 0.46, height * 0.3]} maxRadius={Math.min(width, height) * 0.5} count={5} tone="day" />
       )}
 
-      <LightOrbs width={width} height={height} count={small ? 2 : variant === "product" ? 3 : 4} tone={tone} />
+      <LightOrbs width={width} height={height} count={small ? 2 : variant === "product" || variant === "studio" ? 3 : 4} tone={tone} />
       {(variant === "night" || variant === "home") && <LightBeams width={width} height={height} />}
 
       <LightDust
@@ -530,7 +533,7 @@ function Scene({ variant }: { variant: Variant }) {
       {(variant === "night" || variant === "day") && !small && <LinkArcs width={width} height={height} tone={tone} />}
 
       {variant === "home" && <Rain width={width} height={height} />}
-      {!small && variant !== "product" && (
+      {!small && variant !== "product" && variant !== "studio" && (
         <GlassPanels
           tone={tone}
           drift={variant === "home" ? 1 : 0.5}
@@ -557,12 +560,14 @@ function Scene({ variant }: { variant: Variant }) {
   );
 }
 
+const tone = (variant: Variant): Tone => (variant === "day" || variant === "studio" ? "day" : "night");
+
 /** Ornament layer for a section; fills its positioned parent. */
 export default function Ornaments({ variant }: { variant: Variant }) {
   // Day layers paint the section background, so they overlap their neighbours by 2 px to
   // leave no seam where two views meet.
   return (
-    <View className={`pointer-events-none absolute ${variant === "day" ? "-inset-[2px]" : "inset-0"}`}>
+    <View className={`pointer-events-none absolute ${tone(variant) === "day" ? "-inset-[2px]" : "inset-0"}`}>
       <Scene variant={variant} />
     </View>
   );

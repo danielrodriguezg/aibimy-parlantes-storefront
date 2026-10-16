@@ -80,20 +80,20 @@ export default async function ProductPage({ params }: Params) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData).replace(/</g, "\\u003c") }}
       />
 
-      <section className="relative px-5 pt-24 pb-20 sm:px-10">
-        <OrnamentLayer variant="night" />
+      <section className="estudio relative px-5 pt-24 pb-20 sm:px-10">
+        <OrnamentLayer variant="studio" />
         <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:items-center">
           <div className="order-2 flex flex-col gap-7 lg:order-1">
-            <Link href="/#linea" className="text-sm text-niebla hover:text-blanco">
+            <Link href="/#linea" className="text-sm text-tela/55 hover:text-tela">
               Todos los modelos
             </Link>
             <div>
               <h1 className="display display-l">{spec.code.toLowerCase()}</h1>
-              <p className="mt-3 text-niebla">{product.title}</p>
+              <p className="mt-3 text-tela/55">{product.title}</p>
             </div>
-            {spec.summary && <p className="lede text-blanco/80">{spec.summary}</p>}
+            {spec.summary && <p className="lede text-tela/80">{spec.summary}</p>}
             <AddToCart product={product} />
-            <ul className="grid gap-1.5 text-[0.9375rem] text-niebla">
+            <ul className="grid gap-1.5 text-[0.9375rem] text-tela/55">
               <li>Envío a toda Colombia, calculado al pagar.</li>
               <li>Pago seguro en el checkout de Shopify.</li>
             </ul>

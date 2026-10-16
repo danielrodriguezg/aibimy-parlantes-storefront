@@ -25,9 +25,13 @@ function Cell({ item, tallest }: { item: LineupItem; tallest: number }) {
 
   return (
     <li className="lineup-cell w-[72vw] shrink-0 snap-center sm:w-[44vw] md:w-auto">
-      <Link href={`/parlantes/${item.handle}`} className="group flex h-full flex-col">
+      {/* Studio card: light seamless background, soft contact shadow and a faint floor reflection. */}
+      <Link
+        href={`/parlantes/${item.handle}`}
+        className="group flex h-full flex-col rounded-[28px] bg-[#f5f5f7] px-5 pt-8 pb-6 shadow-[0_1px_2px_rgb(0_0_0/0.04),0_18px_40px_-20px_rgb(0_0_0/0.18)] transition-shadow duration-500 hover:shadow-[0_1px_2px_rgb(0_0_0/0.05),0_28px_60px_-24px_rgb(0_0_0/0.28)]"
+      >
         {/* Shared floor: every photo's height is the product's real height relative to the tallest. */}
-        <div className="relative flex h-[clamp(240px,30vw,440px)] items-end justify-center">
+        <div className="relative mb-10 flex h-[clamp(220px,26vw,400px)] items-end justify-center">
           <div className="contact-shadow absolute bottom-0 left-1/2 h-4 w-3/5 -translate-x-1/2" aria-hidden />
           {item.photo && (
             <div
@@ -50,10 +54,13 @@ function Cell({ item, tallest }: { item: LineupItem; tallest: number }) {
                   className="object-contain object-bottom opacity-0 transition-opacity duration-500 group-hover:opacity-100"
                 />
               )}
+              <div className="floor-reflection" style={{ opacity: 0.1 }} aria-hidden>
+                <Image src={item.photo.src} alt="" fill sizes="(min-width: 768px) 18vw, 70vw" className="object-contain object-bottom" />
+              </div>
             </div>
           )}
         </div>
-        <div className="mt-6 flex items-baseline justify-between gap-3 border-t border-tela/15 pt-4">
+        <div className="flex items-baseline justify-between gap-3 border-t border-tela/10 pt-4">
           <h3 className="display display-s">{item.code.toLowerCase()}</h3>
           <span className="shrink-0 text-sm tabular-nums text-tela/60">
             {item.powerW ? `${item.powerW} W` : "Super Bass"}
