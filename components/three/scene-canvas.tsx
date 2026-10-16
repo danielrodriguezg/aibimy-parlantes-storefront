@@ -5,12 +5,13 @@ import { Canvas } from "@react-three/fiber";
 import { useState } from "react";
 
 /**
- * One WebGL canvas for the whole site. Every 3D region on a page is a drei <View> that tracks a
- * DOM element; this canvas sits fixed above the content (pointer-events off) and draws each view
- * into its element's rectangle, so there is a single GL context no matter how many speakers show.
+ * One WebGL canvas for the whole site, used only for the abstract ornaments. Every ornament
+ * layer is a drei <View> that tracks a DOM element; the canvas sits fixed *behind* the page
+ * content (which is positioned above it in the layout), so ornaments never cover photos or copy.
+ * Views that are off screen are skipped, so scrolled-away sections cost nothing.
  */
 export default function SceneCanvas() {
-  const [dpr, setDpr] = useState(1.75);
+  const [dpr, setDpr] = useState(1.5);
 
   return (
     <Canvas
@@ -19,9 +20,9 @@ export default function SceneCanvas() {
       eventPrefix="client"
       dpr={[1, dpr]}
       gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
-      style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 30 }}
+      style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 0 }}
     >
-      <PerformanceMonitor onDecline={() => setDpr(1)} onIncline={() => setDpr(1.75)} />
+      <PerformanceMonitor onDecline={() => setDpr(1)} onIncline={() => setDpr(1.5)} />
       <View.Port />
     </Canvas>
   );

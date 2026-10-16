@@ -14,14 +14,13 @@ function hasWebGL() {
   }
 }
 
-/** Mounts the shared canvas after hydration; without WebGL, pages show their product photos instead. */
+/** Mounts the ornament canvas after hydration; skipped without WebGL or with reduced motion. */
 export function SceneRoot() {
   const [enabled, setEnabled] = useState(false);
 
   useEffect(() => {
-    const supported = hasWebGL();
-    document.documentElement.dataset.webgl = supported ? "on" : "off";
-    setEnabled(supported);
+    const calm = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    setEnabled(!calm && hasWebGL());
   }, []);
 
   return enabled ? <SceneCanvas /> : null;

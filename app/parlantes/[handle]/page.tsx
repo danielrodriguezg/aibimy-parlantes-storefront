@@ -3,10 +3,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AddToCart } from "@/components/add-to-cart";
-import { ProductStage } from "@/components/product/product-stage";
+import { ProductGallery } from "@/components/product/product-gallery";
 import { bySize, getSpec } from "@/lib/catalog";
 import { formatMoney } from "@/lib/money";
-import { glbUrlFor } from "@/lib/models";
+import { photosFor, type ViewPhoto } from "@/lib/product-photos";
 import { getProductByHandle, getProducts } from "@/lib/shopify";
 
 type Params = { params: Promise<{ handle: string }> };
@@ -32,8 +32,18 @@ export default async function ProductPage({ params }: Params) {
   if (!product) notFound();
 
   const spec = getSpec(product.handle);
-  const glbUrl = glbUrlFor(product.handle);
   const images = product.images.length ? product.images : product.featuredImage ? [product.featuredImage] : [];
+  // Cut-out views when we have them; otherwise the Shopify photos as they are.
+  const cutouts = photosFor(product.handle);
+  const views: ViewPhoto[] = cutouts.length
+    ? cutouts
+    : images.slice(0, 4).map((image, i) => ({
+        src: image.url,
+        width: image.width,
+        height: image.height,
+        view: "front-34",
+        label: `Foto ${i + 1}`
+      }));
   const others = bySize(all).filter((other) => other.handle !== product.handle);
 
   const facts = [
@@ -88,13 +98,7 @@ export default async function ProductPage({ params }: Params) {
           </div>
 
           <div className="order-1 lg:order-2">
-            <ProductStage
-              handle={product.handle}
-              glbUrl={glbUrl}
-              canOpen={spec.shape === "prism" && !glbUrl}
-              fallbackImage={product.featuredImage?.url ?? null}
-              alt={product.title}
-            />
+            <ProductGallery photos={views} title={product.title} />
           </div>
         </div>
       </section>

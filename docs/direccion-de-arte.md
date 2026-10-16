@@ -81,8 +81,9 @@ DÍA
   lo "no confirmado" aparece como `—` en la comparación.
 - Botones que dicen lo que pasa: "Agregar al carrito", "Ir a pagar", "Ver el MY362BT".
 
-## Modelos 3D (híbrido)
+## Fotos y ornamentos
 
-Cada modelo es procedural en three.js (tela con mapa de normales tejido, caucho,
-paneles RGB emisivos animados). Si existe `public/models/<handle>.glb`, se usa ese
-archivo automáticamente en lugar del procedural, sin cambiar código.
+El producto se muestra con sus fotos reales sin fondo (lo que el cliente recibe), nunca con
+réplicas 3D. El 3D queda para ornamentos abstractos detrás del contenido —anillos de sonido,
+polvo de luz, lluvia, paneles de acrílico con bordes iluminados— que toman el color de la luz del
+parlante, reaccionan suave al scroll y al cursor, y desaparecen con "reducir movimiento".

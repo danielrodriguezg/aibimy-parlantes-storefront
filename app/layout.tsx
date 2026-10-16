@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Onest, Unbounded } from "next/font/google";
+import { Comfortaa, Onest, Unbounded } from "next/font/google";
 import Link from "next/link";
 import { CartDrawer } from "@/components/cart-drawer";
 import { CartProvider } from "@/components/cart-provider";
@@ -10,6 +10,8 @@ import "./globals.css";
 
 const display = Unbounded({ subsets: ["latin"], variable: "--font-unbounded", display: "swap" });
 const text = Onest({ subsets: ["latin"], variable: "--font-onest", display: "swap" });
+// Closest open font to the rounded "aibimy" wordmark; used for the logo only.
+const logo = Comfortaa({ subsets: ["latin"], weight: "700", variable: "--font-logo", display: "swap" });
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"),
@@ -21,8 +23,10 @@ export const viewport: Viewport = { themeColor: "#000000" };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="es" className={`${display.variable} ${text.variable}`}>
+    <html lang="es" className={`${display.variable} ${text.variable} ${logo.variable}`}>
       <body className="antialiased">
+        {/* Page content sits above the fixed ornament canvas (z-0). */}
+        <div className="relative z-10">
         <CartProvider>
           <SmoothScroll />
           <SiteHeader />
@@ -30,7 +34,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <CartDrawer />
           <footer className="border-t border-white/10 bg-escenario px-5 py-12 text-sm text-niebla sm:px-10">
             <div className="mx-auto flex max-w-7xl flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
-              <p className="display text-2xl text-caucho">aibimy</p>
+              <p className="wordmark text-2xl text-caucho">aibimy</p>
               <nav aria-label="Pie de página" className="flex flex-wrap gap-x-6 gap-y-2">
                 <Link href="/#linea" className="hover:text-blanco">
                   Modelos
@@ -43,6 +47,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </div>
           </footer>
         </CartProvider>
+        </div>
         <SceneRoot />
       </body>
     </html>
