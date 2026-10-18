@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Comfortaa, Onest } from "next/font/google";
 import Link from "next/link";
 import { CartDrawer } from "@/components/cart-drawer";
+import { LEGAL_LINKS } from "@/components/legal-page";
 import { CartProvider } from "@/components/cart-provider";
 import { SmoothScroll } from "@/components/scroll/smooth-scroll";
 import { SiteHeader } from "@/components/site-header";
@@ -23,7 +24,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="es" className={`${text.variable} ${logo.variable}`}>
       <body className="relative antialiased">
-        <div className="daylight pointer-events-none absolute inset-x-0 top-0 h-[64rem]" aria-hidden />
+        <div className="daylight pointer-events-none absolute inset-x-0 top-0 -z-10 h-[64rem]" aria-hidden />
         <CartProvider>
           <SmoothScroll />
           <SiteHeader />
@@ -41,9 +42,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <Link href="/#comparar" className="hover:text-tinta">
                   Comparar
                 </Link>
-                <Link href="/#envios" className="hover:text-tinta">
-                  Envíos
-                </Link>
+                {LEGAL_LINKS.map((link) => (
+                  <Link key={link.href} href={link.href} className="hover:text-tinta">
+                    {link.label}
+                  </Link>
+                ))}
               </nav>
               <p>© {new Date().getFullYear()} Parla. Vendemos parlantes AIBIMY con envío a toda Colombia.</p>
             </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { useCart } from "@/components/cart-provider";
 import { formatMoney } from "@/lib/money";
@@ -95,7 +96,17 @@ export function CartDrawer() {
             <span>Subtotal</span>
             <span className="tabular-nums">{formatMoney({ amount: String(subtotal), currencyCode })}</span>
           </div>
-          <p className="mb-3 text-xs text-gris">El envío se calcula en el pago. Pagas de forma segura en Shopify.</p>
+          <p className="mb-3 text-xs text-gris">
+            El envío se calcula en el pago. Pagas de forma segura en Shopify. Al pagar aceptas los{" "}
+            <Link href="/terminos" onClick={close} className="underline">
+              términos
+            </Link>{" "}
+            y la{" "}
+            <Link href="/privacidad" onClick={close} className="underline">
+              política de privacidad
+            </Link>
+            .
+          </p>
           {error && <p className="mb-3 text-sm text-red-600">{error}</p>}
           <button
             onClick={checkout}
