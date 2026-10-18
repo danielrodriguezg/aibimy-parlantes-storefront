@@ -1,18 +1,27 @@
+import "server-only";
+
 /**
- * Who sells on this site, for the legal pages and the footer. The values in brackets are
- * placeholders: fill them in with the seller's real data (the one whose Shopify takes the
- * payments) and set `draft` to false once a lawyer has reviewed the legal pages.
+ * Who sells on this site, for the legal pages. Set in the environment (SELLER_*) so the seller
+ * follows the connected Shopify store (the borrowed test store today, Luzonido's own later)
+ * without touching code. A missing field shows as a bracketed placeholder and keeps the legal
+ * pages marked as a draft.
  */
+const value = (name: string) => process.env[name]?.trim() || null;
+const or = (name: string, placeholder: string) => value(name) ?? `[${placeholder}]`;
+
+const required = ["SELLER_LEGAL_NAME", "SELLER_TAX_ID", "SELLER_EMAIL", "SELLER_WHATSAPP", "SELLER_CITY", "SELLER_ADDRESS"];
+
 export const SELLER = {
-  brand: "Luzonido",
-  legalName: "[Nombre o razón social]",
-  taxId: "[NIT o cédula]",
-  email: "[correo de contacto]",
-  whatsapp: "[WhatsApp]",
-  city: "[Ciudad]",
-  address: "[Dirección de notificación]",
-  /** Business days from dispatch to delivery, as Dropi quotes them. */
-  shippingDays: "[X a Y]",
-  updated: "[fecha de publicación]",
-  draft: true
+  brand: value("SELLER_STORE_NAME") ?? "Luzonido",
+  legalName: or("SELLER_LEGAL_NAME", "Nombre o razón social"),
+  taxId: or("SELLER_TAX_ID", "NIT o cédula"),
+  email: or("SELLER_EMAIL", "correo de contacto"),
+  whatsapp: or("SELLER_WHATSAPP", "WhatsApp"),
+  city: or("SELLER_CITY", "Ciudad"),
+  address: or("SELLER_ADDRESS", "Dirección de notificación"),
+  /** Delivery estimate as customers read it, e.g. "2 a 6 días hábiles". */
+  shippingTime: or("SELLER_SHIPPING_TIME", "X a Y días hábiles"),
+  updated: or("SELLER_POLICY_DATE", "fecha de publicación"),
+  /** Draft until every seller field is set; a lawyer reviews the texts before real sales. */
+  draft: required.some((name) => !value(name))
 };

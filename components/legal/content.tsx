@@ -103,7 +103,7 @@ export const LEGAL: Record<string, LegalDoc> = {
         <p>Enviamos a toda Colombia con transportadoras aliadas.</p>
         <h2>Tiempos</h2>
         <p>
-          Tu pedido sale de bodega en 1 a 2 días hábiles y llega en {SELLER.shippingDays} días hábiles según tu ciudad. Las
+          Tu pedido sale de bodega en 1 a 2 días hábiles y llega en {SELLER.shippingTime} según tu ciudad. Las
           zonas rurales o de difícil acceso pueden tardar más; si es tu caso, te avisamos.
         </p>
         <h2>Costo</h2>

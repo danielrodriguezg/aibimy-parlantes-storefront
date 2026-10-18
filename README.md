@@ -36,4 +36,5 @@ npm run dev
 | `SHOPIFY_PRODUCT_QUERY` | Qué productos se venden aquí (sintaxis de búsqueda de Shopify) |
 | `SHOPIFY_REVALIDATE_SECONDS` | Cada cuánto se refresca el catálogo |
 | `NEXT_PUBLIC_CHECKOUT_ENABLED` | `true` para recibir pedidos en producción. Sin esto, un deploy muestra el catálogo con un aviso de pruebas, no se indexa y no crea checkouts (en desarrollo siempre funciona) |
+| `SELLER_*` | Datos del vendedor (quien cobra y factura) para las páginas legales; ver `.env.example`. Si falta alguno, las páginas salen como borrador |
 | `NEXT_PUBLIC_SITE_URL` | URL pública del sitio |
