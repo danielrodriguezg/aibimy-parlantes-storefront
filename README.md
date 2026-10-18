@@ -1,4 +1,4 @@
-# Parlantes AIBIMY Storefront
+# Parla: storefront de parlantes AIBIMY
 
 Tienda headless en Next.js (App Router + Tailwind) para los parlantes AIBIMY publicados en Shopify por la integración con Dropi.
 

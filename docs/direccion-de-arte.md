@@ -1,4 +1,7 @@
-# Dirección de arte — Parlantes AIBIMY
+# Dirección de arte — Parla
+
+Parla es la tienda; AIBIMY es la marca de los parlantes que vende. El nombre y el logo del sitio
+son siempre los de Parla, y AIBIMY se nombra solo para decir qué producto es.
 
 ## Concepto: clean de estudio
 
@@ -25,15 +28,15 @@ selector de modelo y acordeón de detalles a la derecha.
 
 - **Onest** 800 para titulares, interletrado −0.05 em, en frase normal (mayúscula inicial).
 - **Onest** 400–600 para texto: 17 px / 1.6, líneas de máx. 62 caracteres.
-- **Comfortaa** solo para el logotipo `aibimy`.
+- **Comfortaa** solo para el logotipo de la tienda, `parla.` (el punto en naranja).
 
 ## Layout
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│ Modelos  Comparar  Envíos          aibimy                 🛍 │
+│ Modelos  Comparar  Envíos          parla.                 🛍 │
 │                                                              │
-│ MY274BT · AIBIMY            ╭────╮            ←  →   04 / 05  │
+│ AIBIMY MY274BT              ╭────╮            ←  →   04 / 05  │
 │ El (sonido)              ●  │ 🔊 │  [IPX6]                   │
 │ que se →          [40 W]    │    │            Descripción  +  │
 │ ve. ⚡                       │    │            Especificac. −  │

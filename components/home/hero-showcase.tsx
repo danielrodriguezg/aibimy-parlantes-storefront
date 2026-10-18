@@ -32,12 +32,12 @@ export function HeroShowcase({ models, startAt = 0 }: { models: HeroModel[]; sta
   const activePhoto = photos.findIndex((photo) => photo.key === model.photo?.key);
 
   return (
-    <section aria-label="Parlantes AIBIMY" className="relative px-5 pt-28 pb-16 sm:px-10 lg:pt-32">
+    <section aria-label="Parlantes AIBIMY en Parla" className="relative px-5 pt-28 pb-16 sm:px-10 lg:pt-32">
       <div className="mx-auto grid max-w-7xl items-center gap-x-10 gap-y-10 lg:grid-cols-[minmax(0,5fr)_minmax(0,5fr)_minmax(0,3fr)]">
         {/* Headline and buy box */}
         <div className="flex flex-col gap-7">
           <p className="rise text-sm font-semibold tracking-[0.18em] text-gris uppercase">
-            {model.code} · aibimy
+            AIBIMY {model.code}
           </p>
           <h1 className="display display-xl rise" style={{ animationDelay: "0.05s" }}>
             <span className="block">

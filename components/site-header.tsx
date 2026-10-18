@@ -34,8 +34,8 @@ export function SiteHeader() {
             Envíos
           </Link>
         </nav>
-        <Link href="/" className="wordmark text-[1.75rem] sm:text-3xl" aria-label="AIBIMY, inicio">
-          aibimy
+        <Link href="/" className="wordmark text-[1.75rem] sm:text-3xl" aria-label="Parla, inicio">
+          parla<span className="text-caucho">.</span>
         </Link>
         <div className="flex justify-end">
           <button

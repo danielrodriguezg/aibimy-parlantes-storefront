@@ -8,13 +8,13 @@ import { SiteHeader } from "@/components/site-header";
 import "./globals.css";
 
 const text = Onest({ subsets: ["latin"], variable: "--font-onest", display: "swap" });
-// Closest open font to the rounded "aibimy" wordmark; used for the logo only.
+// Rounded face for the Parla wordmark; used for the logo only.
 const logo = Comfortaa({ subsets: ["latin"], weight: "700", variable: "--font-logo", display: "swap" });
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"),
-  title: { default: "Parlantes AIBIMY", template: "%s | Parlantes AIBIMY" },
-  description: "Parlantes Bluetooth AIBIMY con luces RGB y emparejamiento TWS. Envío a toda Colombia y pago seguro."
+  title: { default: "Parla · parlantes AIBIMY", template: "%s | Parla" },
+  description: "Parla vende parlantes Bluetooth AIBIMY con luces RGB y emparejamiento TWS. Envío a toda Colombia y pago seguro."
 };
 
 export const viewport: Viewport = { themeColor: "#f5f6f3" };
@@ -31,7 +31,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <CartDrawer />
           <footer className="border-t border-tinta/10 px-5 py-12 text-sm text-gris sm:px-10">
             <div className="mx-auto flex max-w-7xl flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
-              <p className="wordmark text-2xl text-tinta">aibimy</p>
+              <p className="wordmark text-2xl text-tinta">
+                parla<span className="text-caucho">.</span>
+              </p>
               <nav aria-label="Pie de página" className="flex flex-wrap gap-x-6 gap-y-2">
                 <Link href="/#linea" className="hover:text-tinta">
                   Modelos
@@ -43,7 +45,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   Envíos
                 </Link>
               </nav>
-              <p>© {new Date().getFullYear()} Parlantes AIBIMY. Envíos a toda Colombia.</p>
+              <p>© {new Date().getFullYear()} Parla. Vendemos parlantes AIBIMY con envío a toda Colombia.</p>
             </div>
           </footer>
         </CartProvider>
