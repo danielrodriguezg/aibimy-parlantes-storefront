@@ -1,89 +1,71 @@
-# Dirección de arte — Parlantes AIBIMY
+# Dirección de arte — Parla
 
-## Concepto: la luz que suena
+Parla es la tienda; AIBIMY es la marca de los parlantes que vende. El nombre y el logo del sitio
+son siempre los de Parla, y AIBIMY se nombra solo para decir qué producto es.
 
-Los parlantes AIBIMY son tela negra, caucho naranja y paneles de luz RGB. El sitio
-toma esa idea literal: **la página es un escenario a oscuras y la única fuente de luz
-es el parlante**. El color de su panel RGB tiñe el escenario mientras haces scroll;
-cuando llega el momento de comparar y comprar, se "prende la luz del día" y la página
-pasa a un fondo claro para leer cifras y precios con calma.
+## Concepto: clean de estudio
 
-- De noche se escucha (historia del producto, 3D, scroll).
-- De día se decide (línea completa, comparación, compra).
+El sitio es una página clara y tranquila donde el parlante es el único objeto con color fuerte.
+Cada modelo se presenta como en una vitrina: de pie frente a un **arco** de color apagado, con una
+línea blanca dibujada a mano a su alrededor, unas esferas blancas flotando y fichas blancas con
+sus cifras. Los trazos naranjas a mano (un óvalo alrededor de una palabra, una flecha) son el
+único gesto gráfico y vienen del caucho naranja del producto.
 
-Lo memorable es una sola cosa: el parlante en 3D y su luz. Todo lo demás es callado.
+La referencia es una tienda de producto único: titular grande a la izquierda, producto al centro,
+selector de modelo y acordeón de detalles a la derecha.
 
 ## Paleta
 
-| Token            | Hex       | Uso |
-|------------------|-----------|-----|
-| `--escenario`    | `#000000` | Fondo de las secciones de noche. Negro real, sin tinte. |
-| `--tela`         | `#1C1D21` | Superficies sobre el escenario (carrito, barra de compra), tinta del modo día. |
-| `--dia`          | `#E8E9ED` | Fondo de las secciones de día (gris frío de estudio, no crema). |
-| `--niebla`       | `#8B8E97` | Texto secundario en ambos modos. |
-| `--blanco`       | `#F5F6F8` | Texto principal de noche. |
-| `--caucho`       | `#FF6B00` | Naranja del caucho y del logotipo. **Solo** acción principal de compra y la marca. |
-| Espectro RGB     | —         | Solo como luz emitida por el parlante (3D y su reflejo en el escenario). Nunca como decoración. |
+| Token           | Hex       | Uso |
+|-----------------|-----------|-----|
+| `--papel`       | `#F5F6F3` | Fondo de toda la página. Con un velo de luz verde-amarilla arriba a la derecha (`.daylight`). |
+| `--tinta`       | `#111214` | Texto, botón principal (pill negro) y el bloque de envíos. |
+| `--gris`        | `#6B6E74` | Texto secundario, títulos cerrados del acordeón. |
+| `--caucho`      | `#FF6B00` | Trazos a mano, íconos de las fichas, contador del carrito y el botón del bloque de envíos. |
+| Arcos           | por modelo | Tonos apagados en `lib/catalog.ts` (`tone`): pizarra, salvia, arena, niebla. |
 
 ## Tipografía
 
-- **Unbounded** (display): ancha y redondeada como el logotipo `aibimy`. Titulares en
-  minúscula, como la marca, interletrado −0.03 em. La forma del texto es parte del diseño:
-  los titulares grandes se recortan contra la luz del parlante.
-- **Onest** (texto): sans neutra y legible; 17 px / 1.6, líneas de máx. 62 caracteres.
-- Escala de cuarta justa (×1.333): 13 · 17 · 23 · 30 · 40 · 53 · 71 · 95, y el titular
-  del hero con `clamp()` hasta 160 px.
-- Sin etiquetas en mayúsculas sostenidas, sin cejas sobre cada título, sin una sola
-  palabra resaltada en otro color.
+- **Onest** 800 para titulares, interletrado −0.05 em, en frase normal (mayúscula inicial).
+- **Onest** 400–600 para texto: 17 px / 1.6, líneas de máx. 62 caracteres.
+- **Comfortaa** solo para el logotipo de la tienda, `parla.` (el punto en naranja).
 
 ## Layout
 
 ```
-NOCHE (lienzo 3D fijo detrás)
-┌───────────────────────────────────────────────┐
-│ aibimy                          carrito (0)   │
-│                                               │
-│ el sonido                  ╭──────╮           │
-│ también se ve.             │ 3D   │  ← luz    │
-│ texto 34ch                 ╰──────╯   tiñe    │
-│ [ver los 5 modelos]                   el fondo │
-└───────────────────────────────────────────────┘
-capítulos fijados (pin): texto a la izquierda, el parlante
-gira / se abre / se moja / se empareja a la derecha
-
-DÍA
-┌───────────────────────────────────────────────┐
-│ la línea completa — los 5 en 3D, a escala real│
-│  ▫    ▭    ▯    ◻    ▮   ordenados por tamaño │
-│ 15 W  —   20 W 30 W 40 W                       │
-├───────────────────────────────────────────────┤
-│ tabla comparativa (solo datos confirmados)    │
-└───────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────┐
+│ Modelos  Comparar  Envíos          parla.                 🛍 │
+│                                                              │
+│ AIBIMY MY274BT              ╭────╮            ←  →   04 / 05  │
+│ El (sonido)              ●  │ 🔊 │  [IPX6]                   │
+│ que se →          [40 W]    │    │            Descripción  +  │
+│ ve. ⚡                       │    │            Especificac. −  │
+│ $ 199.900                   ╰────╯             Potencia 40 W  │
+│ [✓ Agregar al carrito] (→)    (↓)             Envío y pago +  │
+└──────────────────────────────────────────────────────────────┘
+El MY274BT, de cerca (4 fichas) · Línea de 5 a escala · Comparar · Llega a tu puerta
 ```
 
-- Texto alineado a la izquierda siempre; el parlante ocupa el centro-derecha.
-- Las secciones de la línea usan la potencia (W) como eje real: es la única secuencia
-  que justifica numerar.
-- Sin tarjetas redondeadas repetidas: los modelos de la línea son objetos 3D sobre el
-  mismo piso, no una cuadrícula de cards.
+- En móvil todo se apila: titular y compra, producto, selector y acordeón.
+- La ficha de producto usa el mismo esquema con las vistas del producto en lugar de los modelos.
 
 ## Movimiento
 
-- Un solo momento orquestado al cargar: el escenario se enciende desde el panel RGB.
-- El resto del movimiento responde al scroll (scrub) o a una acción (abrir carrito,
-  cambiar de modelo, encender las luces en la ficha).
-- `prefers-reduced-motion`: sin scrub ni Lenis; render fijo de cada modelo.
+- Al cargar: los trazos naranjas y la línea blanca se dibujan una vez; las fichas suben.
+- El producto, las esferas y las fichas flotan despacio, cada uno a su ritmo.
+- Cambiar de modelo o de vista cruza las fotos y el color del arco.
+- `prefers-reduced-motion`: sin Lenis, sin flotación, trazos ya dibujados.
 
 ## Copy
 
 - Español de Colombia, tuteo, frases cortas, verbos simples.
 - Solo cifras confirmadas en Shopify. Lo "anunciado" se dice como tal en la ficha;
   lo "no confirmado" aparece como `—` en la comparación.
-- Botones que dicen lo que pasa: "Agregar al carrito", "Ir a pagar", "Ver el MY362BT".
+- Nada de prueba social inventada ("Fulano acaba de comprar"): las fichas flotantes solo
+  muestran datos del producto.
+- Botones que dicen lo que pasa: "Agregar al carrito", "Ir a pagar", "Elegir mi parlante".
 
-## Fotos y ornamentos
+## Fotos
 
 El producto se muestra con sus fotos reales sin fondo (lo que el cliente recibe), nunca con
-réplicas 3D. El 3D queda para ornamentos abstractos detrás del contenido —anillos de sonido,
-polvo de luz, lluvia, paneles de acrílico con bordes iluminados— que toman el color de la luz del
-parlante, reaccionan suave al scroll y al cursor, y desaparecen con "reducir movimiento".
+réplicas 3D.
