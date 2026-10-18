@@ -5,7 +5,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef } from "react";
 import type { ViewPhoto } from "@/lib/product-photos";
-import { stage } from "@/lib/stage-store";
 
 export type LineupItem = {
   handle: string;
@@ -15,6 +14,8 @@ export type LineupItem = {
   height: number;
   price: string;
   summary: string;
+  /** arch colour behind the photo */
+  tone: string;
   photo: ViewPhoto | null;
   alt: ViewPhoto | null;
   available: boolean;
@@ -25,13 +26,18 @@ function Cell({ item, tallest }: { item: LineupItem; tallest: number }) {
 
   return (
     <li className="lineup-cell w-[72vw] shrink-0 snap-center sm:w-[44vw] md:w-auto">
-      {/* Studio card: light seamless background, soft contact shadow and a faint floor reflection. */}
+      {/* White card with the model's arch behind it, like the hero, at a smaller scale. */}
       <Link
         href={`/parlantes/${item.handle}`}
-        className="group flex h-full flex-col rounded-[28px] bg-[#f5f5f7] px-5 pt-8 pb-6 shadow-[0_1px_2px_rgb(0_0_0/0.04),0_18px_40px_-20px_rgb(0_0_0/0.18)] transition-shadow duration-500 hover:shadow-[0_1px_2px_rgb(0_0_0/0.05),0_28px_60px_-24px_rgb(0_0_0/0.28)]"
+        className="chip group flex h-full flex-col rounded-[2rem] px-5 pt-8 pb-6 transition-transform duration-500 hover:-translate-y-1"
       >
         {/* Shared floor: every photo's height is the product's real height relative to the tallest. */}
         <div className="relative mb-10 flex h-[clamp(220px,26vw,400px)] items-end justify-center">
+          <div
+            className="absolute inset-x-[14%] top-[18%] bottom-0 rounded-t-full transition-[top] duration-500 group-hover:top-[12%]"
+            style={{ backgroundColor: item.tone }}
+            aria-hidden
+          />
           <div className="contact-shadow absolute bottom-0 left-1/2 h-4 w-3/5 -translate-x-1/2" aria-hidden />
           {item.photo && (
             <div
@@ -54,22 +60,19 @@ function Cell({ item, tallest }: { item: LineupItem; tallest: number }) {
                   className="object-contain object-bottom opacity-0 transition-opacity duration-500 group-hover:opacity-100"
                 />
               )}
-              <div className="floor-reflection" style={{ opacity: 0.1 }} aria-hidden>
-                <Image src={item.photo.src} alt="" fill sizes="(min-width: 768px) 18vw, 70vw" className="object-contain object-bottom" />
-              </div>
             </div>
           )}
         </div>
-        <div className="flex items-baseline justify-between gap-3 border-t border-tela/10 pt-4">
-          <h3 className="display display-s">{item.code.toLowerCase()}</h3>
-          <span className="shrink-0 text-sm tabular-nums text-tela/60">
+        <div className="flex items-baseline justify-between gap-3 border-t border-tinta/10 pt-4">
+          <h3 className="display display-s">{item.code}</h3>
+          <span className="shrink-0 text-sm tabular-nums text-gris">
             {item.powerW ? `${item.powerW} W` : "Super Bass"}
           </span>
         </div>
-        <p className="mt-2 text-[0.9375rem] leading-snug text-tela/70">{item.summary}</p>
+        <p className="mt-2 text-[0.9375rem] leading-snug text-gris">{item.summary}</p>
         <p className="mt-auto pt-4 font-medium tabular-nums">
           {item.available ? item.price : "Agotado"}
-          <span className="ml-2 font-normal text-tela/50 transition-colors group-hover:text-tela">Ver el {item.code}</span>
+          <span className="ml-2 font-normal text-gris transition-colors group-hover:text-tinta">Ver el {item.code}</span>
         </p>
       </Link>
     </li>
@@ -83,7 +86,7 @@ export function Lineup({ items }: { items: LineupItem[] }) {
 
   // Each model rises onto the floor at its own pace as the section scrolls in.
   useEffect(() => {
-    if (!list.current || stage.reducedMotion) return;
+    if (!list.current || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const cells = list.current.querySelectorAll(".lineup-cell");
     const tweens = Array.from(cells).map((cell, i) =>
       gsap.fromTo(

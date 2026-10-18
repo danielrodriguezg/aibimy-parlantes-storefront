@@ -20,6 +20,8 @@ export type SpeakerSpec = {
   inputs: string | null;
   /** one plain sentence for the lineup and the product hero */
   summary: string;
+  /** colour of the arch behind the product, picked to sit well with its orange trim */
+  tone: string;
 };
 
 export const CATALOG: Record<string, SpeakerSpec> = {
@@ -34,7 +36,8 @@ export const CATALOG: Record<string, SpeakerSpec> = {
     rgb: true,
     tws: true,
     inputs: "USB, microSD",
-    summary: "El más pequeño de la línea: cabe en la mano y cuelga de su cordón."
+    summary: "El más pequeño de la línea: cabe en la mano y cuelga de su cordón.",
+    tone: "#c9d2cf"
   },
   "parlante-aibimy-my264bt-bluetooth-rgb": {
     code: "MY264BT",
@@ -47,7 +50,8 @@ export const CATALOG: Record<string, SpeakerSpec> = {
     rgb: true,
     tws: true,
     inputs: "USB, microSD, auxiliar",
-    summary: "Super Bass, luces RGB arriba y al costado, y carga por USB-C."
+    summary: "Super Bass, luces RGB arriba y al costado, y carga por USB-C.",
+    tone: "#c4cbd6"
   },
   "parlante-aibimy-my268bt-bluetooth-20w": {
     code: "MY268BT",
@@ -60,7 +64,8 @@ export const CATALOG: Record<string, SpeakerSpec> = {
     rgb: null,
     tws: true,
     inputs: null,
-    summary: "Cilindro estéreo de 20 W con correa naranja para llevarlo colgado."
+    summary: "Cilindro estéreo de 20 W con correa naranja para llevarlo colgado.",
+    tone: "#e8d6c4"
   },
   "parlante-aibimy-my362bt-bluetooth-30w": {
     code: "MY362BT",
@@ -73,7 +78,8 @@ export const CATALOG: Record<string, SpeakerSpec> = {
     rgb: true,
     tws: true,
     inputs: "USB, microSD, auxiliar",
-    summary: "30 W con driver de 92 mm, micrófono para llamadas y USB-C."
+    summary: "30 W con driver de 92 mm, micrófono para llamadas y USB-C.",
+    tone: "#bccab9"
   },
   "parlante-aibimy-my274bt-bluetooth-40w": {
     code: "MY274BT",
@@ -86,11 +92,12 @@ export const CATALOG: Record<string, SpeakerSpec> = {
     rgb: true,
     tws: true,
     inputs: "USB, microSD, auxiliar",
-    summary: "El más potente: 40 W, batería de 5400 mAh y luces en dos caras."
+    summary: "El más potente: 40 W, batería de 5400 mAh y luces en dos caras.",
+    tone: "#a9b4b6"
   }
 };
 
-/** The hero and the night chapters feature the flagship. */
+/** The home hero opens on the flagship. */
 export const FEATURED_HANDLE = "parlante-aibimy-my274bt-bluetooth-40w";
 
 const FALLBACK: SpeakerSpec = {
@@ -104,10 +111,11 @@ const FALLBACK: SpeakerSpec = {
   rgb: null,
   tws: false,
   inputs: null,
-  summary: ""
+  summary: "",
+  tone: "#c4cbd6"
 };
 
-/** Products added to Shopify later still render, as a generic prism, until they get an entry here. */
+/** Products added to Shopify later still render, with neutral defaults, until they get an entry here. */
 export function getSpec(handle: string): SpeakerSpec {
   return CATALOG[handle] ?? FALLBACK;
 }
@@ -116,4 +124,32 @@ export function getSpec(handle: string): SpeakerSpec {
 export function bySize<T extends { handle: string }>(items: T[]): T[] {
   const volume = (handle: string) => getSpec(handle).size.reduce((a, b) => a * b, 1);
   return [...items].sort((a, b) => volume(a.handle) - volume(b.handle));
+}
+
+/** The figures worth listing for a model, in reading order; unconfirmed ones are left out. */
+export function specFacts(spec: SpeakerSpec): Array<[string, string]> {
+  const facts: Array<[string, string | null]> = [
+    ["Potencia", spec.powerW ? `${spec.powerW} W` : null],
+    ["Bluetooth", spec.bluetooth],
+    ["Batería", spec.battery],
+    ["Autonomía", spec.autonomy],
+    ["Agua", spec.water],
+    ["Luces RGB", spec.rgb === null ? null : spec.rgb ? "Sí" : "No"],
+    ["TWS", spec.tws ? "Sí, con otro del mismo modelo" : "No"],
+    ["Reproduce desde", spec.inputs]
+  ];
+  return facts.filter((fact): fact is [string, string] => Boolean(fact[1]));
+}
+
+export type ChipIcon = "power" | "water" | "pair" | "battery";
+export type SpecChip = { icon: ChipIcon; title: string; caption: string };
+
+/** Up to two short facts to float beside the product, strongest first. */
+export function specChips(spec: SpeakerSpec): SpecChip[] {
+  const chips: SpecChip[] = [];
+  if (spec.powerW) chips.push({ icon: "power", title: `${spec.powerW} W`, caption: "de potencia" });
+  else if (spec.battery) chips.push({ icon: "battery", title: spec.battery, caption: "de batería" });
+  if (spec.water === "IPX6") chips.push({ icon: "water", title: "IPX6", caption: "resiste el agua" });
+  else if (spec.tws) chips.push({ icon: "pair", title: "Conecta dos", caption: "en estéreo TWS" });
+  return chips.slice(0, 2);
 }
