@@ -2,8 +2,10 @@
  * Background-free product photos in public/products/<handle>/<view>.webp.
  *
  * They are the store's own Shopify photos, cut out with rembg (isnet-general-use; BiRefNet for the
- * MY268BT pair and the MY362BT back), trimmed to the product with a 2 % margin and saved as WebP
- * with transparency, at most 1400 px.
+ * MY268BT pair and the MY362BT back), trimmed to the product with a 2 % margin, then given one
+ * shared finish: defringed edges, small sources enlarged to 1400 px (Lanczos + sharpening) and the
+ * same shadow lift and contrast for every model. The MY264BT splash shot is left out; its clean
+ * front view leads instead.
  */
 
 export type PhotoView = "front-34" | "front" | "back" | "top" | "pair";
@@ -36,25 +38,24 @@ const MY362 = "parlante-aibimy-my362bt-bluetooth-30w";
 
 export const PHOTOS: Record<string, Partial<Record<PhotoView, Photo>>> = {
   [MY262]: {
-    "front-34": photo(MY262, "front-34", 1186, 1031),
-    back: photo(MY262, "back", 1064, 1168)
+    "front-34": photo(MY262, "front-34", 1400, 1217),
+    back: photo(MY262, "back", 1275, 1400)
   },
   [MY264]: {
-    "front-34": photo(MY264, "front-34", 947, 1272),
-    front: photo(MY264, "front", 687, 1099),
-    top: photo(MY264, "top", 1189, 736)
+    front: photo(MY264, "front", 875, 1400),
+    top: photo(MY264, "top", 1400, 867)
   },
   [MY268]: {
-    "front-34": photo(MY268, "front-34", 788, 1253),
-    pair: photo(MY268, "pair", 1280, 1048)
+    "front-34": photo(MY268, "front-34", 880, 1400),
+    pair: photo(MY268, "pair", 1400, 1146)
   },
   [MY274]: {
-    "front-34": photo(MY274, "front-34", 544, 1141),
-    back: photo(MY274, "back", 550, 1136)
+    "front-34": photo(MY274, "front-34", 667, 1400),
+    back: photo(MY274, "back", 678, 1400)
   },
   [MY362]: {
-    "front-34": photo(MY362, "front-34", 1098, 1022),
-    back: photo(MY362, "back", 763, 712)
+    "front-34": photo(MY362, "front-34", 1400, 1303),
+    back: photo(MY362, "back", 1400, 1306)
   }
 };
 
@@ -74,5 +75,6 @@ export function heroPhoto(handle: string): ViewPhoto | null {
 
 /** A second angle for hover and turntable effects, if there is one that shows the product alone. */
 export function altPhoto(handle: string): ViewPhoto | null {
-  return photosFor(handle).find((photo) => photo.view !== "front-34" && photo.view !== "pair") ?? null;
+  const lead = heroPhoto(handle)?.view;
+  return photosFor(handle).find((photo) => photo.view !== lead && photo.view !== "pair") ?? null;
 }

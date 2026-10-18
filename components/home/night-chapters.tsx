@@ -185,6 +185,7 @@ export function NightChapters({ front, back }: { front: ViewPhoto | null; back: 
     <section ref={section} aria-label="El MY274BT" style={{ height: `${CHAPTERS.length * 120}svh` }} className="relative">
       <div className="sticky top-0 h-svh overflow-hidden">
         <div className="stage-glow absolute inset-0" aria-hidden />
+        <div className="stage-toplight absolute inset-0" aria-hidden />
         <Ornaments variant="home" />
 
         {/* Giant outlined "40 W" behind the speaker in the power chapter. */}
@@ -211,8 +212,12 @@ export function NightChapters({ front, back }: { front: ViewPhoto | null; back: 
                     fill
                     priority
                     sizes="(min-width: 881px) 40vw, 80vw"
-                    className="object-contain drop-shadow-[0_30px_40px_rgba(0,0,0,0.55)]"
+                    className="rim-light object-contain"
                   />
+                  {/* Glossy floor: a faded mirror image under the speaker. */}
+                  <div className="floor-reflection" aria-hidden>
+                    <Image src={front.src} alt="" fill sizes="(min-width: 881px) 40vw, 80vw" className="object-contain" />
+                  </div>
                 </div>
               )}
               {back && (
@@ -222,8 +227,12 @@ export function NightChapters({ front, back }: { front: ViewPhoto | null; back: 
                     alt=""
                     fill
                     sizes="(min-width: 881px) 40vw, 80vw"
-                    className="object-contain drop-shadow-[0_30px_40px_rgba(0,0,0,0.55)]"
+                    className="rim-light object-contain"
                   />
+                  {/* Glossy floor: a faded mirror image under the speaker. */}
+                  <div className="floor-reflection" aria-hidden>
+                    <Image src={back.src} alt="" fill sizes="(min-width: 881px) 40vw, 80vw" className="object-contain" />
+                  </div>
                 </div>
               )}
             </div>
