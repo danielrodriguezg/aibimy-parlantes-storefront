@@ -10,13 +10,13 @@ import "./globals.css";
 
 const display = Unbounded({ subsets: ["latin"], variable: "--font-unbounded", display: "swap" });
 const text = Onest({ subsets: ["latin"], variable: "--font-onest", display: "swap" });
-// Rounded logo face for the Luzonido wordmark; used for the logo only.
+// Rounded logo face for the Luzunido wordmark; used for the logo only.
 const logo = Comfortaa({ subsets: ["latin"], weight: "700", variable: "--font-logo", display: "swap" });
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"),
-  title: { default: "Luzonido · parlantes AIBIMY originales", template: "%s | Luzonido" },
-  description: "Luzonido vende parlantes Bluetooth AIBIMY originales con luces RGB y emparejamiento TWS. Envío a toda Colombia.",
+  title: { default: "Luzunido · parlantes AIBIMY originales", template: "%s | Luzunido" },
+  description: "Luzunido vende parlantes Bluetooth AIBIMY originales con luces RGB y emparejamiento TWS. Envío a toda Colombia.",
   // A test deploy (checkout off) stays out of search results.
   robots: checkoutEnabled ? undefined : { index: false, follow: false }
 };
@@ -40,7 +40,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <footer className="border-t border-tela/10 px-5 py-12 text-sm text-grafito sm:px-10">
             <div className="mx-auto flex max-w-7xl flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <p className="wordmark text-2xl text-caucho">luzonido</p>
+                <p className="wordmark text-2xl text-caucho">luzunido</p>
                 <p className="mt-2">Parlantes AIBIMY originales.</p>
               </div>
               <nav aria-label="Pie de página" className="flex flex-wrap gap-x-6 gap-y-2">
@@ -63,7 +63,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   Privacidad
                 </Link>
               </nav>
-              <p>© {new Date().getFullYear()} Luzonido. Envíos a toda Colombia.</p>
+              <p>© {new Date().getFullYear()} Luzunido. Envíos a toda Colombia.</p>
             </div>
           </footer>
         </CartProvider>

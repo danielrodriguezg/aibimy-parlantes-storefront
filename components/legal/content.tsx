@@ -17,7 +17,7 @@ const seller = (
 export const LEGAL: Record<string, LegalDoc> = {
   terminos: {
     title: "términos y condiciones.",
-    summary: "Quién vende, cómo se paga y qué derechos tienes al comprar en Luzonido.",
+    summary: "Quién vende, cómo se paga y qué derechos tienes al comprar en Luzunido.",
     body: (
       <>
         <h2>Quién vende</h2>

@@ -1,6 +1,6 @@
-# Luzonido · Parlantes AIBIMY
+# Luzunido · Parlantes AIBIMY
 
-Luzonido es la tienda; AIBIMY es la marca de los parlantes que vende. Tienda headless en Next.js (App Router + Tailwind) para los parlantes AIBIMY publicados en Shopify por la integración con Dropi.
+Luzunido es la tienda; AIBIMY es la marca de los parlantes que vende. Tienda headless en Next.js (App Router + Tailwind) para los parlantes AIBIMY publicados en Shopify por la integración con Dropi.
 
 ## Cómo funciona
 

@@ -18,8 +18,8 @@ export function SiteHeader() {
             Comparar
           </Link>
         </nav>
-        <Link href="/" className="wordmark text-[1.75rem] text-caucho" aria-label="Luzonido, inicio">
-          luzonido
+        <Link href="/" className="wordmark text-[1.75rem] text-caucho" aria-label="Luzunido, inicio">
+          luzunido
         </Link>
         <button
           onClick={open}

@@ -2,7 +2,7 @@ import "server-only";
 
 /**
  * Who sells on this site, for the legal pages. Set in the environment (SELLER_*) so the seller
- * follows the connected Shopify store (the borrowed test store today, Luzonido's own later)
+ * follows the connected Shopify store (the borrowed test store today, Luzunido's own later)
  * without touching code. A missing field shows as a bracketed placeholder and keeps the legal
  * pages marked as a draft.
  */
@@ -12,7 +12,7 @@ const or = (name: string, placeholder: string) => value(name) ?? `[${placeholder
 const required = ["SELLER_LEGAL_NAME", "SELLER_TAX_ID", "SELLER_EMAIL", "SELLER_WHATSAPP", "SELLER_CITY", "SELLER_ADDRESS"];
 
 export const SELLER = {
-  brand: value("SELLER_STORE_NAME") ?? "Luzonido",
+  brand: value("SELLER_STORE_NAME") ?? "Luzunido",
   legalName: or("SELLER_LEGAL_NAME", "Nombre o razón social"),
   taxId: or("SELLER_TAX_ID", "NIT o cédula"),
   email: or("SELLER_EMAIL", "correo de contacto"),

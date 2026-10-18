@@ -26,7 +26,7 @@ Un velo cálido arriba a la derecha y uno frío abajo a la izquierda (`.wash`) d
 
 ## Tipografía
 
-- **Unbounded** (display): ancha y redondeada como el logotipo de Luzonido. Titulares en minúscula,
+- **Unbounded** (display): ancha y redondeada como el logotipo de Luzunido. Titulares en minúscula,
   interletrado −0.04 em.
 - **Onest** (texto): 17 px / 1.6, líneas de máx. 62 caracteres.
 - Sin etiquetas en mayúsculas sostenidas ni cejas sobre cada título.
@@ -34,7 +34,7 @@ Un velo cálido arriba a la derecha y uno frío abajo a la izquierda (`.wash`) d
 ## Layout
 
 ```
-Modelos  Comparar           luzonido                        (bolsa)
+Modelos  Comparar           luzunido                        (bolsa)
 ┌──────────────────┬───────────────────────┬────────────────┐
 │ el (sonido)      │        ╭───────╮       │  ←  →  04/05   │
 │ también →        │  chip  │ foto  │ chip  │                │
