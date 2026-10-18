@@ -1,13 +1,15 @@
 import type { Metadata } from "next";
-import { OrnamentLayer } from "@/components/three/ornament-layer";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AddToCart } from "@/components/add-to-cart";
 import { ProductGallery } from "@/components/product/product-gallery";
-import { bySize, getSpec } from "@/lib/catalog";
+import { AccordionItem } from "@/components/ui/accordion";
+import { ArrowLeft, ArrowRight, Chip } from "@/components/ui/icons";
+import { Circled } from "@/components/ui/scribble";
+import { bySize, getSpec, highlights, specRows } from "@/lib/catalog";
 import { formatMoney } from "@/lib/money";
-import { photosFor, type ViewPhoto } from "@/lib/product-photos";
+import { heroPhoto, photosFor, type ViewPhoto } from "@/lib/product-photos";
 import { getProductByHandle, getProducts } from "@/lib/shopify";
 
 type Params = { params: Promise<{ handle: string }> };
@@ -46,17 +48,9 @@ export default async function ProductPage({ params }: Params) {
         label: `Foto ${i + 1}`
       }));
   const others = bySize(all).filter((other) => other.handle !== product.handle);
-
-  const facts = [
-    ["Potencia", spec.powerW ? `${spec.powerW} W` : null],
-    ["Bluetooth", spec.bluetooth],
-    ["Batería", spec.battery],
-    ["Autonomía", spec.autonomy],
-    ["Agua", spec.water],
-    ["Luces RGB", spec.rgb === null ? null : spec.rgb ? "Sí" : "No"],
-    ["TWS", spec.tws ? "Sí, con otro del mismo modelo" : "No"],
-    ["Reproduce desde", spec.inputs]
-  ].filter((fact): fact is [string, string] => Boolean(fact[1]));
+  const facts = specRows(spec)
+    .map(([label, value]): [string, string | null] => [label, label === "TWS" && spec.tws ? "Sí, con otro del mismo modelo" : value])
+    .filter((fact): fact is [string, string] => Boolean(fact[1]));
 
   const structuredData = {
     "@context": "https://schema.org",
@@ -80,69 +74,73 @@ export default async function ProductPage({ params }: Params) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData).replace(/</g, "\\u003c") }}
       />
 
-      <section className="estudio relative px-5 pt-24 pb-20 sm:px-10">
-        <OrnamentLayer variant="studio" />
-        <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:items-center">
+      <section className="relative overflow-hidden px-5 pt-6 pb-20 sm:px-10">
+        <div className="relative mx-auto grid max-w-7xl gap-10 lg:grid-cols-[minmax(0,4fr)_minmax(0,5fr)_minmax(0,3fr)] lg:items-center lg:gap-8">
           <div className="order-2 flex flex-col gap-7 lg:order-1">
-            <Link href="/#linea" className="text-sm text-tela/55 hover:text-tela">
+            <Link href="/#linea" className="flex items-center gap-2 text-sm text-grafito hover:text-tela">
+              <ArrowLeft className="h-4 w-4" />
               Todos los modelos
             </Link>
             <div>
-              <h1 className="display display-l">{spec.code.toLowerCase()}</h1>
-              <p className="mt-3 text-tela/55">{product.title}</p>
+              <h1 className="display display-l">
+                <Circled>{spec.code.toLowerCase()}</Circled>
+              </h1>
+              <p className="mt-4 text-grafito">{product.title}</p>
             </div>
-            {spec.summary && <p className="lede text-tela/80">{spec.summary}</p>}
+            {spec.summary && <p className="lede text-grafito">{spec.summary}</p>}
             <AddToCart product={product} />
-            <ul className="grid gap-1.5 text-[0.9375rem] text-tela/55">
-              <li>Envío a toda Colombia, calculado al pagar.</li>
-              <li>Pago seguro en el checkout de Shopify.</li>
-            </ul>
           </div>
 
           <div className="order-1 lg:order-2">
-            <ProductGallery photos={views} title={product.title} />
+            <ProductGallery photos={views} title={product.title} tone={spec.tone} />
           </div>
-        </div>
-      </section>
 
-      <section className="dia relative px-5 py-24 sm:px-10">
-        <OrnamentLayer variant="day" />
-        <div className="mx-auto grid max-w-7xl gap-14 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)]">
-          <div>
-            <h2 className="display display-m">lo que trae.</h2>
-            <dl className="mt-10 divide-y divide-tela/10 border-y border-tela/10">
-              {facts.map(([label, value]) => (
-                <div key={label} className="flex justify-between gap-6 py-3.5">
-                  <dt className="text-tela/60">{label}</dt>
-                  <dd className="text-right font-medium">{value}</dd>
-                </div>
-              ))}
-            </dl>
-            <p className="mt-4 text-sm text-tela/55">Cifras anunciadas por el fabricante.</p>
+          <div className="order-3 flex flex-col gap-8 lg:self-stretch lg:py-6">
+            <div className="flex flex-wrap gap-3">
+              {highlights(spec)
+                .slice(0, 3)
+                .map((highlight) => (
+                  <Chip key={highlight.label} highlight={highlight} />
+                ))}
+            </div>
+            <div className="lg:mt-auto">
+              <AccordionItem title="Lo que trae" group="ficha" open>
+                <dl className="grid gap-1.5">
+                  {facts.map(([label, value]) => (
+                    <div key={label} className="flex justify-between gap-4">
+                      <dt>{label}</dt>
+                      <dd className="text-right font-medium text-tela">{value}</dd>
+                    </div>
+                  ))}
+                </dl>
+                <p className="mt-3 text-sm text-niebla">Cifras anunciadas por el fabricante.</p>
+              </AccordionItem>
+              {product.descriptionHtml && (
+                <AccordionItem title="Descripción" group="ficha">
+                  <div className="product-description" dangerouslySetInnerHTML={{ __html: product.descriptionHtml }} />
+                </AccordionItem>
+              )}
+              <AccordionItem title="Envío y pago" group="ficha">
+                Envío a toda Colombia, calculado al pagar según tu ciudad. Pagas de forma segura en el checkout de Shopify.
+              </AccordionItem>
+            </div>
           </div>
-          {product.descriptionHtml && (
-            <div
-              className="product-description max-w-[62ch] text-tela/80"
-              dangerouslySetInnerHTML={{ __html: product.descriptionHtml }}
-            />
-          )}
         </div>
       </section>
 
       {images.length > 0 && (
-        <section className="dia relative border-t border-tela/10 px-5 py-24 sm:px-10">
-          <OrnamentLayer variant="day" />
+        <section className="px-5 py-20 sm:px-10">
           <div className="mx-auto max-w-7xl">
             <h2 className="display display-m mb-10">en fotos.</h2>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {images.map((image) => (
-                <div key={image.url} className="relative aspect-square overflow-hidden rounded-2xl bg-white">
+                <div key={image.url} className="relative aspect-square overflow-hidden rounded-[32px] bg-white">
                   <Image
                     src={image.url}
                     alt={image.altText ?? product.title}
                     fill
                     sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-                    className="object-contain p-6"
+                    className="object-contain p-8"
                   />
                 </div>
               ))}
@@ -152,25 +150,31 @@ export default async function ProductPage({ params }: Params) {
       )}
 
       {others.length > 0 && (
-        <section className="relative px-5 py-24 sm:px-10">
-          <OrnamentLayer variant="night" />
+        <section className="px-5 py-20 sm:px-10">
           <div className="mx-auto max-w-7xl">
-            <h2 className="display display-m mb-8">los otros modelos.</h2>
-            <ul className="divide-y divide-white/10 border-y border-white/10">
+            <h2 className="display display-m mb-10">los otros modelos.</h2>
+            <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {others.map((other) => {
                 const otherSpec = getSpec(other.handle);
+                const photo = heroPhoto(other.handle);
                 return (
                   <li key={other.handle}>
-                    <Link
-                      href={`/parlantes/${other.handle}`}
-                      className="group grid grid-cols-[1fr_auto] items-baseline gap-x-6 gap-y-1 py-5 sm:grid-cols-[14rem_1fr_auto]"
-                    >
-                      <span className="display display-s group-hover:text-caucho">{otherSpec.code.toLowerCase()}</span>
-                      <span className="col-span-2 row-start-2 text-[0.9375rem] text-niebla sm:col-span-1 sm:row-start-auto">
-                        {otherSpec.summary}
-                      </span>
-                      <span className="row-start-1 tabular-nums sm:row-start-auto">
-                        {formatMoney(other.priceRange.minVariantPrice)}
+                    <Link href={`/parlantes/${other.handle}`} className="group flex h-full flex-col rounded-[32px] bg-white p-5">
+                      <div className="relative mb-5 aspect-square">
+                        <div className="arch absolute inset-x-[14%] top-[18%] bottom-0" style={{ backgroundColor: otherSpec.tone }} aria-hidden />
+                        {photo && (
+                          <div className="absolute inset-x-[18%] top-[4%] bottom-0 transition-transform duration-500 group-hover:-translate-y-2">
+                            <Image src={photo.src} alt="" fill sizes="(min-width: 1024px) 20vw, 45vw" className="cutout object-contain object-bottom" />
+                          </div>
+                        )}
+                      </div>
+                      <span className="display display-s">{otherSpec.code.toLowerCase()}</span>
+                      <span className="mt-2 text-[0.9375rem] leading-snug text-grafito">{otherSpec.summary}</span>
+                      <span className="mt-auto flex items-center justify-between pt-5">
+                        <span className="font-semibold tabular-nums">{formatMoney(other.priceRange.minVariantPrice)}</span>
+                        <span className="grid h-10 w-10 place-items-center rounded-full border border-tela/15 transition-colors group-hover:border-tela group-hover:bg-tela group-hover:text-white">
+                          <ArrowRight className="h-4 w-4" />
+                        </span>
                       </span>
                     </Link>
                   </li>
@@ -182,7 +186,7 @@ export default async function ProductPage({ params }: Params) {
       )}
 
       {/* Mobile buy bar: the price and the button stay in reach while reading. */}
-      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-tela/90 px-5 py-3 backdrop-blur-xl lg:hidden">
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-tela/10 bg-papel/90 px-5 py-3 backdrop-blur-xl lg:hidden">
         <AddToCart product={product} compact />
       </div>
     </main>

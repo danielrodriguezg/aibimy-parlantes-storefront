@@ -10,7 +10,7 @@ const ZOOM = 2.2;
  * The product's cut-out views. Changing view turns the speaker like a turntable; clicking (or
  * the zoom button) magnifies the spot under the pointer; on touch, swiping changes view.
  */
-export function ProductGallery({ photos, title }: { photos: ViewPhoto[]; title: string }) {
+export function ProductGallery({ photos, title, tone }: { photos: ViewPhoto[]; title: string; tone: string }) {
   const [active, setActive] = useState(0);
   const [zoomed, setZoomed] = useState(false);
   const [origin, setOrigin] = useState({ x: 50, y: 50 });
@@ -50,12 +50,10 @@ export function ProductGallery({ photos, title }: { photos: ViewPhoto[]; title: 
           setZoomed((value) => !value);
         }}
       >
-        <div
-          className="pointer-events-none absolute inset-[10%] rounded-full opacity-70 blur-3xl"
-          style={{ background: "radial-gradient(closest-side, rgb(255 107 0 / 0.07), transparent)" }}
-          aria-hidden
-        />
-        <div className="contact-shadow absolute bottom-[6%] left-1/2 h-[5%] w-1/2 -translate-x-1/2" aria-hidden />
+        <div className="arch absolute inset-x-[14%] top-[16%] bottom-[6%]" style={{ backgroundColor: tone }} aria-hidden />
+        <div className="contact-shadow absolute bottom-[4%] left-1/2 h-[4%] w-1/2 -translate-x-1/2" aria-hidden />
+        <span className="sphere absolute top-[26%] left-[8%] h-8 w-8" aria-hidden />
+        <span className="sphere absolute top-[54%] right-[9%] h-12 w-12 [animation-delay:-3s]" aria-hidden />
 
         <div
           className="absolute inset-0 transition-transform duration-500 ease-out"
@@ -66,7 +64,7 @@ export function ProductGallery({ photos, title }: { photos: ViewPhoto[]; title: 
             return (
               <div
                 key={`${photo.view}-${index}`}
-                className="absolute inset-[8%] transition-[opacity,transform] duration-700 ease-out"
+                className="absolute inset-x-[16%] top-[4%] bottom-[6%] transition-[opacity,transform] duration-700 ease-out"
                 style={{
                   opacity: offset === 0 ? 1 : 0,
                   transform:
@@ -78,20 +76,17 @@ export function ProductGallery({ photos, title }: { photos: ViewPhoto[]; title: 
                   src={photo.src}
                   alt={`${title}, vista ${photo.label.toLowerCase()}`}
                   fill
-                  priority={index === 0}
-                  sizes="(min-width: 1024px) 50vw, 100vw"
-                  className="object-contain drop-shadow-[0_24px_28px_rgba(0,0,0,0.16)]"
+                  preload={index === 0}
+                  sizes="(min-width: 1024px) 40vw, 100vw"
+                  className="cutout object-contain object-bottom"
                 />
-                <div className="floor-reflection" style={{ opacity: 0.12 }} aria-hidden>
-                  <Image src={photo.src} alt="" fill sizes="(min-width: 1024px) 50vw, 100vw" className="object-contain" />
-                </div>
               </div>
             );
           })}
         </div>
       </div>
 
-      <div className="mt-4 flex flex-wrap items-center gap-3">
+      <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
         {photos.length > 1 && (
           <div className="flex gap-2" role="group" aria-label="Vistas del producto">
             {photos.map((photo, index) => (
@@ -101,8 +96,8 @@ export function ProductGallery({ photos, title }: { photos: ViewPhoto[]; title: 
                 aria-pressed={index === active}
                 aria-label={`Ver ${photo.label.toLowerCase()}`}
                 onClick={() => select(index)}
-                className={`relative h-16 w-16 rounded-xl border bg-white transition-colors ${
-                  index === active ? "border-tela" : "border-tela/10 hover:border-tela/40"
+                className={`relative h-16 w-16 rounded-2xl border bg-white transition-colors ${
+                  index === active ? "border-tela" : "border-transparent hover:border-tela/30"
                 }`}
               >
                 <Image src={photo.src} alt="" fill sizes="64px" className="object-contain p-1.5" />
@@ -119,7 +114,7 @@ export function ProductGallery({ photos, title }: { photos: ViewPhoto[]; title: 
         >
           {zoomed ? "Reducir" : "Ampliar"}
         </button>
-        <span className="text-sm text-tela/55">
+        <span className="w-full text-center text-sm text-niebla">
           {photos.length > 1 ? "Toca la foto para ampliar, desliza para girar" : "Toca la foto para ampliar"}
         </span>
       </div>

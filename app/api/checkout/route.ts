@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createCheckout } from "@/lib/shopify";
+import { checkoutEnabled } from "@/lib/store";
 import type { CartLine } from "@/lib/types";
 
 const MAX_LINES = 20;
@@ -14,6 +15,7 @@ function parseLines(body: unknown): CartLine[] {
 }
 
 export async function POST(request: Request) {
+  if (!checkoutEnabled) return NextResponse.json({ error: "Los pagos todavía no están habilitados." }, { status: 503 });
   const lines = parseLines(await request.json().catch(() => null));
   if (!lines.length) return NextResponse.json({ error: "El carrito está vacío." }, { status: 400 });
 

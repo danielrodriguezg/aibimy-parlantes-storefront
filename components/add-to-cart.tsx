@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useCart } from "@/components/cart-provider";
+import { Check } from "@/components/ui/icons";
 import { formatMoney } from "@/lib/money";
 import type { Product } from "@/lib/types";
 
@@ -33,10 +34,11 @@ export function AddToCart({ product, compact = false }: { product: Product; comp
           imageUrl: (variant.image ?? product.featuredImage)?.url ?? null
         })
       }
-      className={`rounded-full bg-caucho font-medium text-escenario transition-colors hover:bg-caucho-hondo active:scale-[0.99] disabled:bg-white/10 disabled:text-niebla ${
-        compact ? "px-6 py-3" : "w-full py-4 text-lg"
+      className={`flex items-center justify-center gap-3 rounded-full bg-tela font-medium text-white transition-transform hover:-translate-y-0.5 active:translate-y-0 disabled:bg-tela/25 disabled:hover:translate-y-0 ${
+        compact ? "px-6 py-3" : "py-4 pr-8 pl-6 text-lg"
       }`}
     >
+      {variant.availableForSale && <Check className="h-5 w-5" />}
       {variant.availableForSale ? "Agregar al carrito" : "Agotado"}
     </button>
   );
@@ -51,9 +53,9 @@ export function AddToCart({ product, compact = false }: { product: Product; comp
   }
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col items-start gap-6">
       <div className="flex items-baseline gap-3">
-        <span className="display display-s tabular-nums">{formatMoney(variant.price)}</span>
+        <span className="display text-[clamp(2rem,3.2vw,3rem)] font-medium tabular-nums">{formatMoney(variant.price)}</span>
         {onSale && (
           <span className="text-lg text-niebla line-through">{formatMoney(variant.compareAtPrice!)}</span>
         )}
@@ -70,7 +72,7 @@ export function AddToCart({ product, compact = false }: { product: Product; comp
               onClick={() => setVariantId(candidate.id)}
               disabled={!candidate.availableForSale}
               className={`rounded-full border px-4 py-2 text-sm transition-colors disabled:opacity-40 ${
-                candidate.id === variant.id ? "border-blanco bg-blanco text-escenario" : "border-white/25 hover:border-white/60"
+                candidate.id === variant.id ? "border-tela bg-tela text-white" : "border-tela/20 hover:border-tela/60"
               }`}
             >
               {candidate.title}
