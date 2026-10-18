@@ -20,6 +20,8 @@ export type SpeakerSpec = {
   inputs: string | null;
   /** one plain sentence for the lineup and the product hero */
   summary: string;
+  /** the muted studio colour of the arch the product stands in */
+  tone: string;
 };
 
 export const CATALOG: Record<string, SpeakerSpec> = {
@@ -34,7 +36,8 @@ export const CATALOG: Record<string, SpeakerSpec> = {
     rgb: true,
     tws: true,
     inputs: "USB, microSD",
-    summary: "El más pequeño de la línea: cabe en la mano y cuelga de su cordón."
+    summary: "El más pequeño de la línea: cabe en la mano y cuelga de su cordón.",
+    tone: "#f1d6c2"
   },
   "parlante-aibimy-my264bt-bluetooth-rgb": {
     code: "MY264BT",
@@ -47,7 +50,8 @@ export const CATALOG: Record<string, SpeakerSpec> = {
     rgb: true,
     tws: true,
     inputs: "USB, microSD, auxiliar",
-    summary: "Super Bass, luces RGB arriba y al costado, y carga por USB-C."
+    summary: "Super Bass, luces RGB arriba y al costado, y carga por USB-C.",
+    tone: "#b7c2ce"
   },
   "parlante-aibimy-my268bt-bluetooth-20w": {
     code: "MY268BT",
@@ -60,7 +64,8 @@ export const CATALOG: Record<string, SpeakerSpec> = {
     rgb: null,
     tws: true,
     inputs: null,
-    summary: "Cilindro estéreo de 20 W con correa naranja para llevarlo colgado."
+    summary: "Cilindro estéreo de 20 W con correa naranja para llevarlo colgado.",
+    tone: "#d8ccbf"
   },
   "parlante-aibimy-my362bt-bluetooth-30w": {
     code: "MY362BT",
@@ -73,7 +78,8 @@ export const CATALOG: Record<string, SpeakerSpec> = {
     rgb: true,
     tws: true,
     inputs: "USB, microSD, auxiliar",
-    summary: "30 W con driver de 92 mm, micrófono para llamadas y USB-C."
+    summary: "30 W con driver de 92 mm, micrófono para llamadas y USB-C.",
+    tone: "#c9cfc4"
   },
   "parlante-aibimy-my274bt-bluetooth-40w": {
     code: "MY274BT",
@@ -86,11 +92,12 @@ export const CATALOG: Record<string, SpeakerSpec> = {
     rgb: true,
     tws: true,
     inputs: "USB, microSD, auxiliar",
-    summary: "El más potente: 40 W, batería de 5400 mAh y luces en dos caras."
+    summary: "El más potente: 40 W, batería de 5400 mAh y luces en dos caras.",
+    tone: "#aebbbb"
   }
 };
 
-/** The hero and the night chapters feature the flagship. */
+/** The home hero opens on the flagship. */
 export const FEATURED_HANDLE = "parlante-aibimy-my274bt-bluetooth-40w";
 
 const FALLBACK: SpeakerSpec = {
@@ -104,10 +111,11 @@ const FALLBACK: SpeakerSpec = {
   rgb: null,
   tws: false,
   inputs: null,
-  summary: ""
+  summary: "",
+  tone: "#aebbbb"
 };
 
-/** Products added to Shopify later still render, as a generic prism, until they get an entry here. */
+/** Products added to Shopify later still render, with generic facts, until they get an entry here. */
 export function getSpec(handle: string): SpeakerSpec {
   return CATALOG[handle] ?? FALLBACK;
 }
@@ -116,4 +124,31 @@ export function getSpec(handle: string): SpeakerSpec {
 export function bySize<T extends { handle: string }>(items: T[]): T[] {
   const volume = (handle: string) => getSpec(handle).size.reduce((a, b) => a * b, 1);
   return [...items].sort((a, b) => volume(a.handle) - volume(b.handle));
+}
+
+export type Highlight = { icon: "bolt" | "light" | "drop" | "pair" | "battery"; label: string; detail: string };
+
+/** The two or three facts worth a floating chip, from what the manufacturer confirms. */
+export function highlights(spec: SpeakerSpec): Highlight[] {
+  const list: Highlight[] = [];
+  if (spec.powerW) list.push({ icon: "bolt", label: `${spec.powerW} W`, detail: "de potencia" });
+  if (spec.rgb) list.push({ icon: "light", label: "Luces RGB", detail: "en el panel de luz" });
+  if (spec.water?.startsWith("IPX")) list.push({ icon: "drop", label: spec.water, detail: "aguanta la lluvia" });
+  if (spec.battery) list.push({ icon: "battery", label: spec.battery, detail: "de batería" });
+  if (spec.tws) list.push({ icon: "pair", label: "TWS", detail: "estéreo con dos" });
+  return list;
+}
+
+/** Spec rows for tables and accordions; null means the manufacturer doesn't confirm it. */
+export function specRows(spec: SpeakerSpec): Array<[string, string | null]> {
+  return [
+    ["Potencia", spec.powerW ? `${spec.powerW} W` : null],
+    ["Bluetooth", spec.bluetooth],
+    ["Batería", spec.battery],
+    ["Autonomía", spec.autonomy],
+    ["Agua", spec.water],
+    ["Luces RGB", spec.rgb === null ? null : spec.rgb ? "Sí" : "No"],
+    ["TWS", spec.tws ? "Sí" : "No"],
+    ["Reproduce desde", spec.inputs]
+  ];
 }

@@ -2,33 +2,35 @@
 
 /* Tokens: see docs/direccion-de-arte.md */
 @theme {
-  --color-escenario: #000000;
+  --color-papel: #f6f7f5;
+  --color-blanco: #ffffff;
   --color-tela: #1c1d21;
-  --color-dia: #e8e9ed;
+  --color-grafito: #5d6068;
   --color-niebla: #8b8e97;
-  --color-blanco: #f5f6f8;
+  --color-linea: #e3e5e2;
   --color-caucho: #ff6b00;
-  --color-caucho-hondo: #e25a00;
+  --color-caucho-suave: #fff1e6;
+  --color-salvia: #aebbbb;
+  --color-pizarra: #b7c2ce;
+  --color-arena: #d8ccbf;
+  --color-durazno: #f1d6c2;
 
   --font-display: var(--font-unbounded), ui-sans-serif, system-ui, sans-serif;
   --font-sans: var(--font-onest), ui-sans-serif, system-ui, sans-serif;
 }
 
 :root {
-  color-scheme: dark;
-  --glow-h: 25;
-  --glow-a: 0;
+  color-scheme: light;
 }
 
 html {
-  background: var(--color-escenario);
+  background: var(--color-papel);
 }
 
 body {
-  /* clip, not hidden: keeps position: sticky working for the night chapters */
   overflow-x: clip;
-  background: var(--color-escenario);
-  color: var(--color-blanco);
+  /* No background here: the html one paints the canvas so the fixed .wash can sit between them. */
+  color: var(--color-tela);
   font-family: var(--font-sans);
   font-size: 1.0625rem;
   line-height: 1.6;
@@ -64,118 +66,131 @@ html.lenis body {
 .display {
   font-family: var(--font-display);
   font-weight: 600;
-  letter-spacing: -0.035em;
+  letter-spacing: -0.04em;
   text-wrap: balance;
 }
 .display-xl {
-  font-size: clamp(3rem, 9.2vw, 10rem);
-  line-height: 0.9;
+  font-size: clamp(3rem, 6.2vw, 6.4rem);
+  line-height: 0.98;
 }
 .display-l {
-  font-size: clamp(2.3rem, 5.4vw, 5.9rem);
-  line-height: 0.96;
+  font-size: clamp(2.3rem, 4.8vw, 5rem);
+  line-height: 1;
 }
 .display-m {
-  font-size: clamp(1.75rem, 3.2vw, 3.3rem);
-  line-height: 1.02;
+  font-size: clamp(1.75rem, 3vw, 3rem);
+  line-height: 1.04;
 }
 .display-s {
-  font-size: clamp(1.35rem, 1.9vw, 1.875rem);
+  font-size: clamp(1.3rem, 1.8vw, 1.75rem);
   line-height: 1.12;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.025em;
 }
 .lede {
-  font-size: clamp(1.0625rem, 1.3vw, 1.4375rem);
-  line-height: 1.5;
-  max-width: 34ch;
+  font-size: clamp(1.0625rem, 1.2vw, 1.25rem);
+  line-height: 1.55;
+  max-width: 36ch;
   text-wrap: pretty;
 }
 
-/* Day sections: studio light for comparing and buying. */
-.dia {
-  background: var(--color-dia);
-  color: var(--color-tela);
-  color-scheme: light;
-}
-/* Studio seamless for the product page hero: lighter than daylight, the photo is the subject. */
-.estudio {
-  background: #f5f5f7;
-  color: var(--color-tela);
-  color-scheme: light;
-}
-.estudio .contact-shadow {
-  background: radial-gradient(closest-side, rgb(0 0 0 / 0.32), transparent);
-}
-/* With the ornament canvas running, it paints the daylight behind these sections. */
-.has-ornaments .dia,
-.has-ornaments .estudio {
-  background: transparent;
-}
-
-/* The stage glow: light spilling from the speaker's RGB panels, hue set from the 3D scene. */
-.stage-glow {
+/* A soft wash of colour in two corners of the page, like light from a studio window. */
+.wash {
   background:
-    radial-gradient(42% 48% at var(--glow-x, 68%) 56%, hsl(var(--glow-h) 92% 56% / calc(var(--glow-a) * 0.42)), transparent 72%),
-    radial-gradient(70% 40% at var(--glow-x, 68%) 100%, hsl(var(--glow-h) 92% 50% / calc(var(--glow-a) * 0.18)), transparent 70%);
-}
-@media (max-aspect-ratio: 17/20) {
-  .stage-glow {
-    --glow-x: 50%;
-  }
+    radial-gradient(42% 46% at 100% 0%, rgb(255 196 150 / 0.42), transparent 70%),
+    radial-gradient(36% 40% at 0% 100%, rgb(190 214 230 / 0.36), transparent 70%);
 }
 
-/* Refined stage (night): overhead light on the product, a thin rim of light and side glows in
-   the speaker's current RGB colour, and a glossy floor that mirrors it. */
-.stage-toplight {
-  background: radial-gradient(34% 58% at var(--glow-x, 68%) -6%, rgb(255 255 255 / 0.11), transparent 72%);
-}
-.rim-light {
-  filter: drop-shadow(0 0 1px rgb(255 255 255 / 0.5)) drop-shadow(-16px 0 26px hsl(var(--glow-h, 25) 90% 55% / 0.32))
-    drop-shadow(16px -6px 28px hsl(calc(var(--glow-h, 25) + 160) 85% 60% / 0.26)) drop-shadow(0 30px 40px rgb(0 0 0 / 0.55));
-}
-/* A copy of the photo mirrored about its bottom edge, fading out quickly below the contact line. */
-.floor-reflection {
-  position: absolute;
-  inset: 0;
-  transform: scaleY(-1);
-  transform-origin: bottom;
-  opacity: 0.2;
-  filter: blur(1px);
-  mask-image: linear-gradient(to top, black, transparent 32%);
-  -webkit-mask-image: linear-gradient(to top, black, transparent 32%);
-  pointer-events: none;
+/* The arch the product stands in: a rounded-top panel in a muted studio tone. */
+.arch {
+  border-radius: 999px 999px 0 0;
+  transition: background-color 0.6s ease;
 }
 
-/* Product cutouts: a slow float, and a soft contact shadow that tightens as they rise. */
-@keyframes float {
+/* Product cutouts on the light studio: a soft drop shadow and a contact shadow under them. */
+.cutout {
+  filter: drop-shadow(0 28px 30px rgb(28 29 33 / 0.24)) drop-shadow(0 6px 10px rgb(28 29 33 / 0.14));
+}
+.contact-shadow {
+  background: radial-gradient(closest-side, rgb(28 29 33 / 0.34), transparent);
+  filter: blur(5px);
+}
+
+/* Small white spheres that drift around the arch. */
+.sphere {
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fff 0%, #f3f4f2 45%, #d6d9d9 100%);
+  box-shadow: 0 16px 28px rgb(28 29 33 / 0.1);
+  animation: drift 7s ease-in-out infinite alternate;
+}
+@keyframes drift {
   from {
     transform: translate3d(0, 0, 0);
   }
   to {
-    transform: translate3d(0, -14px, 0);
+    transform: translate3d(10px, -18px, 0);
   }
 }
-@keyframes shadow-breathe {
-  from {
-    transform: scaleX(1);
-    opacity: 0.55;
-  }
+
+/* Hand-drawn strokes (the orange ring around a word, the arrow, the white loop) draw themselves once. */
+.draw-on {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: draw-on 1.1s cubic-bezier(0.65, 0, 0.35, 1) 0.35s forwards;
+}
+@keyframes draw-on {
   to {
-    transform: scaleX(0.86);
-    opacity: 0.38;
+    stroke-dashoffset: 0;
   }
 }
-.float {
-  animation: float 4.2s ease-in-out infinite alternate;
+
+/* A product photo swapping in: it rises a little and fades up. */
+.swap-in {
+  animation: swap-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
-.contact-shadow {
-  background: radial-gradient(closest-side, rgb(0 0 0 / 0.85), transparent);
-  filter: blur(6px);
-  animation: shadow-breathe 4.2s ease-in-out infinite alternate;
+@keyframes swap-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 24px, 0) scale(0.97);
+  }
 }
-.dia .contact-shadow {
-  background: radial-gradient(closest-side, rgb(28 29 33 / 0.45), transparent);
-  animation: none;
+
+/* Floating chips: white pills with a soft shadow. */
+.chip {
+  box-shadow: 0 18px 40px -8px rgb(28 29 33 / 0.16), 0 2px 6px rgb(28 29 33 / 0.06);
+}
+
+/* <details> accordions: hide the native marker, turn the + into a − when open. */
+.accordion summary {
+  list-style: none;
+}
+.accordion summary::-webkit-details-marker {
+  display: none;
+}
+.accordion-plus {
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+.accordion[open] .accordion-plus {
+  transform: rotate(90deg);
+  opacity: 0;
+}
+
+/* Legal pages: plain reading rhythm. */
+.legal h2 {
+  margin: 2.25rem 0 0.6rem;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.2rem;
+  letter-spacing: -0.02em;
+  color: var(--color-tela);
+}
+.legal p,
+.legal ul {
+  margin-bottom: 0.9rem;
+  max-width: 64ch;
+}
+.legal ul {
+  list-style: disc;
+  padding-left: 1.25rem;
 }
 
 .product-description p {
@@ -193,8 +208,12 @@ html.lenis body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .float,
-  .contact-shadow {
+  .draw-on {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+  .sphere,
+  .swap-in {
     animation: none;
   }
   *,
