@@ -1,6 +1,7 @@
 import "server-only";
 import { getSpec, type SpeakerSpec } from "@/lib/catalog";
 import { SELLER } from "@/lib/seller";
+import { codEnabled } from "@/lib/store";
 
 /**
  * Frequently asked questions, written from what people search before buying a Bluetooth speaker
@@ -18,6 +19,24 @@ const shipping = () =>
     ? `El pedido llega en ${SELLER.shippingTimeKnown} según tu ciudad.`
     : "El tiempo depende de tu ciudad y lo confirmamos al despachar.";
 
+/** Cash on delivery leads the list when it is on: it is the first question buyers ask in Colombia. */
+const codFaqs = (): Faq[] =>
+  codEnabled
+    ? [
+        {
+          question: "¿Puedo pagar contra entrega?",
+          answer:
+            "Sí. Eliges \"Pídelo y paga al recibir\", dejas tu nombre, celular y dirección, y pagas en efectivo cuando el parlante llega a tu casa. No necesitas tarjeta.",
+          link: { href: "/legal/envios#contra-entrega", label: "Cómo funciona" }
+        },
+        {
+          question: "¿Cómo funciona el pago contra entrega?",
+          answer:
+            "Haces el pedido en el sitio, te escribimos por WhatsApp para confirmar la dirección, lo despachamos y le pagas al transportador cuando lo recibes. Revisa el paquete antes de pagar."
+        }
+      ]
+    : [];
+
 export function homeFaqs(handles: string[]): Faq[] {
   const specs = handles.map(getSpec);
   const codes = (pick: (spec: SpeakerSpec) => boolean) => specs.filter(pick).map((spec) => spec.code);
@@ -27,7 +46,7 @@ export function homeFaqs(handles: string[]): Faq[] {
   const tws = codes((spec) => spec.tws);
   const autonomy = specs.filter((spec) => spec.autonomy).map((spec) => `${spec.code}: ${spec.autonomy!.toLowerCase()}`);
 
-  const faqs: Faq[] = [];
+  const faqs: Faq[] = codFaqs();
   if (strongest && smallest)
     faqs.push({
       question: "¿Qué parlante Bluetooth AIBIMY me conviene?",
@@ -76,7 +95,9 @@ export function homeFaqs(handles: string[]): Faq[] {
     },
     {
       question: "¿Cómo pago?",
-      answer: "Pagas en el checkout seguro de Shopify con los medios que allí aparecen. No vemos ni guardamos los datos de tu tarjeta."
+      answer: codEnabled
+        ? "En efectivo al recibir (contra entrega), o en línea en el checkout seguro de Shopify. No vemos ni guardamos los datos de tu tarjeta."
+        : "En el checkout seguro de Shopify, con los medios que allí aparecen. No vemos ni guardamos los datos de tu tarjeta."
     }
   );
   return faqs;
@@ -84,7 +105,7 @@ export function homeFaqs(handles: string[]): Faq[] {
 
 /** Questions for one model, from its own facts. */
 export function productFaqs(spec: SpeakerSpec): Faq[] {
-  const faqs: Faq[] = [];
+  const faqs: Faq[] = codFaqs().slice(0, 1);
   if (spec.tws)
     faqs.push({
       question: `¿Puedo conectar dos ${spec.code} en estéreo?`,

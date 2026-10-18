@@ -3,12 +3,14 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
+import { CodButton } from "@/components/cod-form";
 import { useCart } from "@/components/cart-provider";
 import { AccordionItem } from "@/components/ui/accordion";
 import { ArrowDown, ArrowLeft, ArrowRight, Check, Chip } from "@/components/ui/icons";
 import { Arrowed, Circled, Loop } from "@/components/ui/scribble";
 import type { Highlight } from "@/lib/catalog";
 import { formatMoney } from "@/lib/money";
+import { codEnabled } from "@/lib/store";
 import type { ViewPhoto } from "@/lib/product-photos";
 import type { Product } from "@/lib/types";
 
@@ -101,7 +103,7 @@ export function HeroShowcase({ models, startIndex }: { models: HeroModel[]; star
             <p className="lede text-grafito">{model.summary}</p>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center gap-4">
             {variant && (
               <button
                 type="button"
@@ -130,6 +132,13 @@ export function HeroShowcase({ models, startIndex }: { models: HeroModel[]; star
               <ArrowRight className="h-5 w-5" />
             </Link>
           </div>
+          {variant?.availableForSale && (
+            <CodButton
+              key={variant.id}
+              className="-mt-4 self-start"
+              items={[{ variantId: variant.id, quantity: 1, title: product.title, price: variant.price }]}
+            />
+          )}
         </div>
 
         {/* Centre: the arch, the product, the white loop, spheres and chips. */}
@@ -193,7 +202,10 @@ export function HeroShowcase({ models, startIndex }: { models: HeroModel[]; star
               </dl>
             </AccordionItem>
             <AccordionItem title="Envío y pago" group="hero" open>
-              Envío a toda Colombia, calculado al pagar según tu ciudad. Pagas de forma segura en el checkout de Shopify.
+              Envío a toda Colombia, calculado según tu ciudad.{" "}
+              {codEnabled
+                ? "Pagas en efectivo al recibir (contra entrega) o en línea en el checkout seguro de Shopify."
+                : "Pagas de forma segura en el checkout de Shopify."}
             </AccordionItem>
           </div>
         </div>

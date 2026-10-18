@@ -1,4 +1,5 @@
 import { SELLER } from "@/lib/seller";
+import { codEnabled } from "@/lib/store";
 
 export type LegalDoc = { title: string; summary: string; body: React.ReactNode };
 
@@ -36,6 +37,13 @@ export const LEGAL: Record<string, LegalDoc> = {
           pagar. El pago se procesa en el checkout de Shopify y en la pasarela de pago que allí elijas; {SELLER.brand} no
           ve ni guarda los datos de tu tarjeta. El pedido queda confirmado cuando recibes el correo de confirmación.
         </p>
+        {codEnabled && (
+          <p>
+            También puedes pagar contra entrega: haces el pedido con tu nombre, celular y dirección, te contactamos para
+            confirmarlo y pagas en efectivo al transportador cuando lo recibes. Si no podemos confirmar el pedido o no se recibe
+            en la dirección indicada, se cancela sin costo para ti.
+          </p>
+        )}
         <h2>Disponibilidad</h2>
         <p>
           Si un producto se agota después de tu pago, te avisamos y te devolvemos el dinero completo por el mismo medio,
@@ -108,6 +116,16 @@ export const LEGAL: Record<string, LegalDoc> = {
         </p>
         <h2>Costo</h2>
         <p>El valor del envío se calcula según tu ciudad y lo ves en el checkout antes de pagar.</p>
+        {codEnabled && (
+          <>
+            <h2 id="contra-entrega">Pago contra entrega</h2>
+            <p>
+              Elige &quot;Pídelo y paga al recibir&quot;, deja tu nombre, celular y dirección, y paga en efectivo cuando el
+              transportador te entregue el parlante. Antes de despachar te escribimos por WhatsApp al {SELLER.whatsapp} para
+              confirmar la dirección. Revisa el paquete antes de pagar; si llega abierto o dañado, no lo recibas y escríbenos.
+            </p>
+          </>
+        )}
         <h2>Seguimiento</h2>
         <p>Cuando tu pedido sale, te enviamos la guía para que sigas el envío. Si algo se retrasa, escríbenos al {SELLER.whatsapp}.</p>
         <h2>Al recibir</h2>

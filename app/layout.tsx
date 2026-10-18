@@ -8,7 +8,7 @@ import { SiteHeader } from "@/components/site-header";
 import { WhatsAppButton } from "@/components/whatsapp-button";
 import { JsonLd, SITE_URL, STORE_NAME } from "@/lib/seo";
 import { SELLER } from "@/lib/seller";
-import { checkoutEnabled } from "@/lib/store";
+import { checkoutEnabled, codEnabled } from "@/lib/store";
 import "./globals.css";
 
 const display = Unbounded({ subsets: ["latin"], variable: "--font-unbounded", display: "swap" });
@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"),
   title: { default: "Parlantes Bluetooth con luces RGB · AIBIMY originales | Luzunido", template: "%s | Luzunido" },
   description:
-    "Parlantes Bluetooth AIBIMY originales con luces RGB, hasta 40 W, resistentes al agua IPX6 y TWS para conectar dos en estéreo. Envío a toda Colombia.",
+    `Parlantes Bluetooth AIBIMY originales con luces RGB, hasta 40 W, resistentes al agua IPX6 y TWS para conectar dos en estéreo. Envío a toda Colombia${codEnabled ? " y pago contra entrega" : ""}.`,
   alternates: { canonical: "/" },
   openGraph: { type: "website", locale: "es_CO", siteName: "Luzunido" },
   // A test deploy (checkout off) stays out of search results.

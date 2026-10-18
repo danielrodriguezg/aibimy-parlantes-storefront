@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createCheckout } from "@/lib/shopify";
+import { allow, clientIp, sameOrigin } from "@/lib/request-guard";
 import { checkoutEnabled } from "@/lib/store";
 import type { CartLine } from "@/lib/types";
 
@@ -16,6 +17,10 @@ function parseLines(body: unknown): CartLine[] {
 
 export async function POST(request: Request) {
   if (!checkoutEnabled) return NextResponse.json({ error: "Los pagos todavía no están habilitados." }, { status: 503 });
+  if (!sameOrigin(request)) return NextResponse.json({ error: "Solicitud no permitida." }, { status: 403 });
+  if (!allow(`checkout:${clientIp(request)}`, 20, 10 * 60 * 1000)) {
+    return NextResponse.json({ error: "Demasiados intentos. Espera unos minutos." }, { status: 429 });
+  }
   const lines = parseLines(await request.json().catch(() => null));
   if (!lines.length) return NextResponse.json({ error: "El carrito está vacío." }, { status: 400 });
 

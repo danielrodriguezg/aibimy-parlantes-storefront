@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { CodButton } from "@/components/cod-form";
 import { useCart } from "@/components/cart-provider";
 import { Check } from "@/components/ui/icons";
 import { formatMoney } from "@/lib/money";
@@ -81,7 +82,12 @@ export function AddToCart({ product, compact = false }: { product: Product; comp
         </fieldset>
       )}
 
-      {button}
+      <div className="flex flex-wrap gap-3">
+        {button}
+        {variant.availableForSale && (
+          <CodButton items={[{ variantId: variant.id, quantity: 1, title: product.title, price: variant.price }]} />
+        )}
+      </div>
     </div>
   );
 }

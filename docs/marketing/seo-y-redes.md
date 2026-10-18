@@ -28,6 +28,13 @@ políticas claras.
 - parlante AIBIMY · AIBIMY MY274BT · MY362BT · MY268BT · MY264BT · MY262BT Pro (marca y modelo: poca competencia)
 - parlante bluetooth envío a toda Colombia
 
+**Contra entrega (la intención más fuerte en Colombia)**
+- parlante bluetooth contra entrega · pago contra entrega
+- parlante bluetooth paga al recibir · pago en efectivo al recibir
+- parlante AIBIMY contra entrega · parlante con luces contra entrega [ciudad]
+Usar en: títulos y descripciones (ya lo dicen cuando `NEXT_PUBLIC_COD_ENABLED=true`), primer frame de los
+anuncios ("Pagas al recibir"), copy de todas las publicaciones y respuestas por WhatsApp.
+
 **Pregunta (FAQ del sitio, carruseles y reels)**
 - ¿qué parlante bluetooth comprar? / ¿cuál me conviene?
 - ¿qué significa TWS? · ¿cómo conectar dos parlantes bluetooth?
@@ -35,6 +42,7 @@ políticas claras.
 - ¿cuántos vatios debe tener un parlante?
 - ¿cuánto dura la batería de un parlante bluetooth?
 - ¿son originales? · ¿tienen garantía? · ¿puedo devolverlo?
+- ¿puedo pagar contra entrega? · ¿cómo funciona el pago contra entrega? · ¿revisas antes de pagar?
 
 Dónde viven en el sitio: títulos y descripciones de cada ficha (`lib/seo.tsx`), H1 de la portada,
 preguntas frecuentes con datos estructurados FAQPage (`lib/faq.ts`), selector "¿cuál es para ti?",
@@ -49,6 +57,8 @@ sitemap, migas de pan y datos de producto.
 3. **¿Cuál es para ti?** (decisión): fiesta, piscina y playa, para llevar. Un modelo por publicación.
 4. **Dos suenan mejor** (ticket alto): demostración de TWS con dos unidades del mismo modelo.
 5. **Lo que llega a tu casa** (prueba): unboxing real, empaque y guía de envío. Sin testimonios inventados.
+6. **Pagas al recibir** (conversión): cómo funciona la contra entrega en 3 pasos (pides con tu celular → te
+   confirmamos por WhatsApp → pagas en efectivo al transportador). Debe ir en el primer segundo de los anuncios.
 
 Cadencia sugerida: 1 publicación cada 8 a 12 horas (reel en la mañana y historia o carrusel en la noche).
 
@@ -57,11 +67,14 @@ Cadencia sugerida: 1 publicación cada 8 a 12 horas (reel en la mañana y histor
 - Español de Colombia, tuteo, frases cortas.
 - Solo cifras del fabricante: 40 W, 5400 mAh, IPX6, TWS. Siempre "anunciado por el fabricante" si se discute.
 - Nunca: "el mejor del mercado", "100 % sumergible", precios tachados falsos, "quedan 2", testimonios inventados.
-- Llamado a la acción: "Elige el tuyo en luzunido.co · envío a toda Colombia".
+- Llamado a la acción: "Pídelo y paga al recibir en luzunido.co · envío a toda Colombia".
+- Contra entrega: confirmar siempre por WhatsApp antes de despachar (baja los pedidos rechazados, el
+  costo más alto del modelo contra entrega). No prometer "envío gratis" si no lo es.
 
 ## Hashtags (rotar 5 a 8 por publicación)
 
 Producto: #parlantebluetooth #parlantes #parlanteportatil #parlanterbg #lucesrgb #aibimy
+Pago: #contraentrega #pagoalrecibir #pagocontraentrega
 Uso: #fiesta #piscina #playa #parche #musica
 Lugar: #colombia #bogota #medellin #cali #barranquilla
 Marca: #luzunido #elsonidotambienseve

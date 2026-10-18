@@ -1,4 +1,5 @@
 import type { SpeakerSpec } from "@/lib/catalog";
+import { codEnabled } from "@/lib/store";
 
 /** Public origin of the site, for canonical URLs, the sitemap and structured data. */
 export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000").replace(/\/$/, "");
@@ -22,7 +23,7 @@ export function productSearchDescription(spec: SpeakerSpec) {
     spec.tws ? "TWS para conectar dos en estéreo" : null,
     spec.battery ? `batería de ${spec.battery}` : null
   ].filter((fact): fact is string => Boolean(fact) && !spec.summary.includes(fact!.split(" ").pop()!));
-  return `Parlante Bluetooth AIBIMY ${spec.code} original. ${spec.summary} ${facts.length ? `${capitalize(facts.join(", "))}.` : ""} Envío a toda Colombia.`
+  return `Parlante Bluetooth AIBIMY ${spec.code} original. ${spec.summary} ${facts.length ? `${capitalize(facts.join(", "))}.` : ""} Envío a toda Colombia${codEnabled ? " y pago contra entrega" : ""}.`
     .replace(/\s+/g, " ")
     .trim();
 }
