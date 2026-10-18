@@ -5,6 +5,9 @@ import { CartDrawer } from "@/components/cart-drawer";
 import { CartProvider } from "@/components/cart-provider";
 import { SmoothScroll } from "@/components/scroll/smooth-scroll";
 import { SiteHeader } from "@/components/site-header";
+import { WhatsAppButton } from "@/components/whatsapp-button";
+import { JsonLd, SITE_URL, STORE_NAME } from "@/lib/seo";
+import { SELLER } from "@/lib/seller";
 import { checkoutEnabled } from "@/lib/store";
 import "./globals.css";
 
@@ -15,8 +18,11 @@ const logo = Comfortaa({ subsets: ["latin"], weight: "700", variable: "--font-lo
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"),
-  title: { default: "Luzunido · parlantes AIBIMY originales", template: "%s | Luzunido" },
-  description: "Luzunido vende parlantes Bluetooth AIBIMY originales con luces RGB y emparejamiento TWS. Envío a toda Colombia.",
+  title: { default: "Parlantes Bluetooth con luces RGB · AIBIMY originales | Luzunido", template: "%s | Luzunido" },
+  description:
+    "Parlantes Bluetooth AIBIMY originales con luces RGB, hasta 40 W, resistentes al agua IPX6 y TWS para conectar dos en estéreo. Envío a toda Colombia.",
+  alternates: { canonical: "/" },
+  openGraph: { type: "website", locale: "es_CO", siteName: "Luzunido" },
   // A test deploy (checkout off) stays out of search results.
   robots: checkoutEnabled ? undefined : { index: false, follow: false }
 };
@@ -27,6 +33,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="es" className={`${display.variable} ${text.variable} ${logo.variable}`}>
       <body className="antialiased">
+        <JsonLd
+          data={{
+            "@context": "https://schema.org",
+            "@graph": [
+              { "@type": "Organization", "@id": `${SITE_URL}/#org`, name: STORE_NAME, url: SITE_URL, logo: `${SITE_URL}/opengraph-image` },
+              { "@type": "WebSite", "@id": `${SITE_URL}/#web`, name: STORE_NAME, url: SITE_URL, inLanguage: "es-CO", publisher: { "@id": `${SITE_URL}/#org` } }
+            ]
+          }}
+        />
         {/* Studio light: a warm wash in one corner of the window and a cool one in the other. */}
         <div className="wash pointer-events-none fixed inset-0 -z-10" aria-hidden />
         <CartProvider>
@@ -37,6 +52,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <SiteHeader />
           {children}
           <CartDrawer />
+          <WhatsAppButton number={SELLER.whatsappNumber} />
           <footer className="border-t border-tela/10 px-5 py-12 text-sm text-grafito sm:px-10">
             <div className="mx-auto flex max-w-7xl flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
               <div>

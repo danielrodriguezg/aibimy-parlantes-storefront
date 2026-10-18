@@ -1,5 +1,9 @@
 import Link from "next/link";
+import { FaqSection } from "@/components/faq";
 import { Features } from "@/components/home/features";
+import { UseCases } from "@/components/home/use-cases";
+import { TrustBar } from "@/components/trust-bar";
+import { homeFaqs } from "@/lib/faq";
 import { HeroShowcase, type HeroModel } from "@/components/home/hero-showcase";
 import { Lineup, type LineupItem } from "@/components/home/lineup";
 import { ArrowRight } from "@/components/ui/icons";
@@ -64,6 +68,9 @@ export default async function HomePage() {
           </div>
         </section>
       )}
+
+      <TrustBar />
+      <UseCases handles={products.map((product) => product.handle)} />
 
       <section id="linea" className="scroll-mt-20 px-5 pt-20 pb-12 sm:px-10">
         <div className="mx-auto max-w-7xl">
@@ -151,6 +158,8 @@ export default async function HomePage() {
           </div>
         </section>
       )}
+
+      <FaqSection faqs={homeFaqs(products.map((product) => product.handle))} title="preguntas frecuentes." group="faq-home" />
 
       <section className="px-5 py-28 sm:px-10">
         <div className="mx-auto grid max-w-7xl gap-12 md:grid-cols-2 md:items-end">
