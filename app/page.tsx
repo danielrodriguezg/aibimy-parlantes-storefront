@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { FaqSection } from "@/components/faq";
+import { BrandClose } from "@/components/home/brand-close";
+import { HowItWorks } from "@/components/home/how-it-works";
 import { Features } from "@/components/home/features";
 import { UseCases } from "@/components/home/use-cases";
 import { TrustBar } from "@/components/trust-bar";
 import { homeFaqs } from "@/lib/faq";
 import { HeroShowcase, type HeroModel } from "@/components/home/hero-showcase";
 import { Lineup, type LineupItem } from "@/components/home/lineup";
-import { ArrowRight } from "@/components/ui/icons";
 import { FEATURED_HANDLE, bySize, getSpec, highlights, specRows } from "@/lib/catalog";
 import { formatMoney } from "@/lib/money";
 import { altPhoto, heroPhoto, type ViewPhoto } from "@/lib/product-photos";
@@ -70,6 +71,7 @@ export default async function HomePage() {
       )}
 
       <TrustBar />
+      <HowItWorks />
       <UseCases handles={products.map((product) => product.handle)} />
 
       <section id="linea" className="scroll-mt-20 px-5 pt-20 pb-12 sm:px-10">
@@ -161,30 +163,7 @@ export default async function HomePage() {
 
       <FaqSection faqs={homeFaqs(products.map((product) => product.handle))} title="preguntas frecuentes." group="faq-home" />
 
-      <section className="px-5 py-28 sm:px-10">
-        <div className="mx-auto grid max-w-7xl gap-12 md:grid-cols-2 md:items-end">
-          <h2 className="display display-l max-w-[11ch]">llega a tu puerta.</h2>
-          <div className="grid gap-8">
-            <dl className="grid gap-5 sm:grid-cols-2">
-              <div>
-                <dt className="font-medium">Envío a toda Colombia</dt>
-                <dd className="mt-1 text-[0.9375rem] text-grafito">El costo se calcula al pagar, según tu ciudad.</dd>
-              </div>
-              <div>
-                <dt className="font-medium">Pago seguro</dt>
-                <dd className="mt-1 text-[0.9375rem] text-grafito">Pagas en el checkout de Shopify.</dd>
-              </div>
-            </dl>
-            <Link
-              href="#linea"
-              className="flex items-center gap-3 justify-self-start rounded-full bg-tela py-4 pr-6 pl-8 font-medium text-white transition-transform hover:-translate-y-0.5"
-            >
-              Elegir mi parlante
-              <ArrowRight className="h-5 w-5" />
-            </Link>
-          </div>
-        </div>
-      </section>
+      <BrandClose />
     </main>
   );
 }

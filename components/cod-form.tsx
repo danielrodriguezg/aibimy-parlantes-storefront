@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 import { DEPARTMENTS } from "@/lib/colombia";
 import { formatMoney } from "@/lib/money";
-import { checkoutEnabled, codEnabled } from "@/lib/store";
+import { codEnabled } from "@/lib/store";
 import type { Money } from "@/lib/types";
 
 export type CodItem = { variantId: string; quantity: number; title: string; price: Money };
@@ -31,7 +31,7 @@ export function CodButton({
   const [error, setError] = useState<string | null>(null);
   const [orderName, setOrderName] = useState("");
 
-  if (!checkoutEnabled || !codEnabled || !items.length) return null;
+  if (!codEnabled || !items.length) return null;
 
   const currencyCode = items[0].price.currencyCode;
   const subtotal = items.reduce((sum, item) => sum + Number(item.price.amount) * item.quantity, 0);

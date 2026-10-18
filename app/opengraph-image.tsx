@@ -40,7 +40,7 @@ export default async function OpenGraphImage() {
               right: 20,
               top: 90,
               bottom: 0,
-              background: "#aebbbb",
+              background: "#cbbeff",
               borderRadius: "180px 180px 0 0"
             }}
           />

@@ -10,13 +10,16 @@
   --color-linea: #e3e5e2;
   --color-caucho: #ff6b00;
   --color-caucho-suave: #fff1e6;
-  --color-salvia: #aebbbb;
-  --color-pizarra: #b7c2ce;
-  --color-arena: #d8ccbf;
-  --color-durazno: #f1d6c2;
+  --color-durazno: #fccfa8;
+  --color-lavanda: #cbbeff;
+  --color-rosa: #fbc3d9;
+  --color-cielo: #bfd6f6;
+  --color-noche: #141416;
+  --color-crema: #f5efe6;
 
   --font-display: var(--font-unbounded), ui-sans-serif, system-ui, sans-serif;
   --font-sans: var(--font-onest), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-dm-mono), ui-monospace, monospace;
 }
 
 :root {
@@ -52,6 +55,14 @@ html.lenis body {
   outline: 2px solid var(--color-caucho);
   outline-offset: 3px;
   border-radius: 4px;
+}
+
+/* Small monospaced labels at card corners ("01", "Cómo funciona"): a precise, data-like counterpoint to the heavy display type. */
+.mono-label {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
 }
 
 /* The brand wordmark, set in the rounded logo face. */

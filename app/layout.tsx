@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Comfortaa, Onest, Unbounded } from "next/font/google";
+import { Comfortaa, DM_Mono, Onest, Unbounded } from "next/font/google";
 import Link from "next/link";
 import { CartDrawer } from "@/components/cart-drawer";
 import { CartProvider } from "@/components/cart-provider";
@@ -14,6 +14,8 @@ import "./globals.css";
 const display = Unbounded({ subsets: ["latin"], variable: "--font-unbounded", display: "swap" });
 const text = Onest({ subsets: ["latin"], variable: "--font-onest", display: "swap" });
 // Rounded logo face for the Luzunido wordmark; used for the logo only.
+// Monospaced labels on cards, as in the modular-card reference.
+const mono = DM_Mono({ subsets: ["latin"], weight: ["400", "500"], variable: "--font-dm-mono", display: "swap" });
 const logo = Comfortaa({ subsets: ["latin"], weight: "700", variable: "--font-logo", display: "swap" });
 
 export const metadata: Metadata = {
@@ -31,7 +33,7 @@ export const viewport: Viewport = { themeColor: "#f6f7f5" };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="es" className={`${display.variable} ${text.variable} ${logo.variable}`}>
+    <html lang="es" className={`${display.variable} ${text.variable} ${logo.variable} ${mono.variable}`}>
       <body className="antialiased">
         <JsonLd
           data={{

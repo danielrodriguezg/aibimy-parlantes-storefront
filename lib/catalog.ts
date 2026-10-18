@@ -37,7 +37,7 @@ export const CATALOG: Record<string, SpeakerSpec> = {
     tws: true,
     inputs: "USB, microSD",
     summary: "El más pequeño de la línea: cabe en la mano y cuelga de su cordón.",
-    tone: "#f1d6c2"
+    tone: "#fccfa8"
   },
   "parlante-aibimy-my264bt-bluetooth-rgb": {
     code: "MY264BT",
@@ -51,7 +51,7 @@ export const CATALOG: Record<string, SpeakerSpec> = {
     tws: true,
     inputs: "USB, microSD, auxiliar",
     summary: "Super Bass, luces RGB arriba y al costado, y carga por USB-C.",
-    tone: "#b7c2ce"
+    tone: "#bfd6f6"
   },
   "parlante-aibimy-my268bt-bluetooth-20w": {
     code: "MY268BT",
@@ -65,7 +65,7 @@ export const CATALOG: Record<string, SpeakerSpec> = {
     tws: true,
     inputs: null,
     summary: "Cilindro estéreo de 20 W con correa naranja para llevarlo colgado.",
-    tone: "#d8ccbf"
+    tone: "#fbc3d9"
   },
   "parlante-aibimy-my362bt-bluetooth-30w": {
     code: "MY362BT",
@@ -79,7 +79,7 @@ export const CATALOG: Record<string, SpeakerSpec> = {
     tws: true,
     inputs: "USB, microSD, auxiliar",
     summary: "30 W con driver de 92 mm, micrófono para llamadas y USB-C.",
-    tone: "#c9cfc4"
+    tone: "#bfd6f6"
   },
   "parlante-aibimy-my274bt-bluetooth-40w": {
     code: "MY274BT",
@@ -93,7 +93,7 @@ export const CATALOG: Record<string, SpeakerSpec> = {
     tws: true,
     inputs: "USB, microSD, auxiliar",
     summary: "El más potente: 40 W, batería de 5400 mAh y luces en dos caras.",
-    tone: "#aebbbb"
+    tone: "#cbbeff"
   }
 };
 
@@ -112,7 +112,7 @@ const FALLBACK: SpeakerSpec = {
   tws: false,
   inputs: null,
   summary: "",
-  tone: "#aebbbb"
+  tone: "#cbbeff"
 };
 
 /** Products added to Shopify later still render, with generic facts, until they get an entry here. */

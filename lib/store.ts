@@ -10,4 +10,8 @@ export const checkoutEnabled = process.env.NODE_ENV !== "production" || process.
  * always in development, and in production with NEXT_PUBLIC_COD_ENABLED=true once Dropi collects
  * on delivery and SHOPIFY_ADMIN_ACCESS_TOKEN can create the orders.
  */
-export const codEnabled = process.env.NODE_ENV !== "production" || process.env.NEXT_PUBLIC_COD_ENABLED === "true";
+export const codEnabled =
+  process.env.NODE_ENV !== "production" ||
+  process.env.NEXT_PUBLIC_COD_ENABLED === "true" ||
+  // Vercel previews show the whole cash-on-delivery flow; /api/cod still refuses to create orders there.
+  process.env.NEXT_PUBLIC_VERCEL_ENV === "preview";
