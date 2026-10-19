@@ -26,7 +26,7 @@ export function Features({ handles }: { handles: string[] }) {
       title: "luz que suena.",
       body: `Paneles de luz RGB en ${rgb} ${plural(rgb, "modelo", "modelos")}. Sobre la mesa se ven desde cualquier lado.`,
       photo: top,
-      tone: "#b7c2ce"
+      tone: "#bfd6f6"
     });
   const back = PHOTOS["parlante-aibimy-my274bt-bluetooth-40w"]?.back;
   if (strongest && back)
@@ -35,7 +35,7 @@ export function Features({ handles }: { handles: string[] }) {
       title: `hasta ${strongest} W.`,
       body: "El MY274BT trae bajos reforzados y una batería de 5400 mAh para pasar la tarde sin cable.",
       photo: back,
-      tone: "#aebbbb"
+      tone: "#cbbeff"
     });
   const front = PHOTOS["parlante-aibimy-my362bt-bluetooth-30w"]?.["front-34"];
   if (ipx6 && front)
@@ -44,7 +44,7 @@ export function Features({ handles }: { handles: string[] }) {
       title: "aguanta la lluvia.",
       body: `Protección IPX6 anunciada en ${ipx6} ${plural(ipx6, "modelo", "modelos")}: salpicaduras y chorros de agua, no para sumergirlo.`,
       photo: front,
-      tone: "#c9cfc4"
+      tone: "#fbc3d9"
     });
   const pair = PHOTOS["parlante-aibimy-my268bt-bluetooth-20w"]?.pair;
   if (tws && pair)
@@ -53,7 +53,7 @@ export function Features({ handles }: { handles: string[] }) {
       title: "dos suenan mejor.",
       body: `Con TWS enlazas dos parlantes del mismo modelo y escuchas en estéreo. Lo traen ${tws === specs.length ? "todos" : tws}.`,
       photo: pair,
-      tone: "#f1d6c2"
+      tone: "#fccfa8"
     });
 
   if (!features.length) return null;
@@ -63,9 +63,10 @@ export function Features({ handles }: { handles: string[] }) {
       <div className="mx-auto max-w-7xl">
         <h2 className="display display-l mb-14 max-w-[14ch]">lo que traen.</h2>
         <ul className="grid gap-5 sm:grid-cols-2">
-          {features.map((feature) => (
+          {features.map((feature, index) => (
             <li key={feature.title} className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] items-end gap-4 rounded-[32px] bg-white p-6 sm:p-8">
               <div className="flex h-full flex-col gap-4 pb-2">
+                <span className="mono-label text-niebla">{String(index + 1).padStart(2, "0")}</span>
                 <span className="grid h-12 w-12 place-items-center rounded-full bg-caucho-suave text-caucho">
                   <HighlightIcon icon={feature.icon} className="h-6 w-6" />
                 </span>

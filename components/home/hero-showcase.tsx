@@ -3,12 +3,14 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
+import { CodButton } from "@/components/cod-form";
 import { useCart } from "@/components/cart-provider";
 import { AccordionItem } from "@/components/ui/accordion";
 import { ArrowDown, ArrowLeft, ArrowRight, Check, Chip } from "@/components/ui/icons";
 import { Arrowed, Circled, Loop } from "@/components/ui/scribble";
 import type { Highlight } from "@/lib/catalog";
 import { formatMoney } from "@/lib/money";
+import { codEnabled } from "@/lib/store";
 import type { ViewPhoto } from "@/lib/product-photos";
 import type { Product } from "@/lib/types";
 
@@ -71,7 +73,11 @@ export function HeroShowcase({ models, startIndex }: { models: HeroModel[]; star
       <div className="relative mx-auto grid max-w-7xl gap-10 lg:grid-cols-[minmax(0,4fr)_minmax(0,5fr)_minmax(0,3fr)] lg:items-center lg:gap-8">
         {/* Left: the promise, the model in view, its price and the buy button. */}
         <div className="flex flex-col gap-8 lg:py-10">
-          <h1 className="display text-[clamp(2.75rem,5vw,5rem)] leading-[1.02]">
+          <h1 className="flex items-center gap-2 text-sm font-medium text-grafito">
+            <span className="h-2 w-2 rounded-full bg-caucho" aria-hidden />
+            Parlantes Bluetooth con luces RGB · AIBIMY originales
+          </h1>
+          <p className="display -mt-4 text-[clamp(2.75rem,5vw,5rem)] leading-[1.02]">
             el <Circled>sonido</Circled>
             <br />
             <Arrowed>también</Arrowed>
@@ -82,7 +88,7 @@ export function HeroShowcase({ models, startIndex }: { models: HeroModel[]; star
                 <path d="M13 3 5 13.5h6L10 21l8-10.5h-6L13 3z" />
               </svg>
             </span>
-          </h1>
+          </p>
 
           <div key={product.handle} className="swap-in flex flex-col gap-4" aria-live="polite">
             <p className="display display-s">
@@ -97,7 +103,7 @@ export function HeroShowcase({ models, startIndex }: { models: HeroModel[]; star
             <p className="lede text-grafito">{model.summary}</p>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center gap-4">
             {variant && (
               <button
                 type="button"
@@ -126,6 +132,13 @@ export function HeroShowcase({ models, startIndex }: { models: HeroModel[]; star
               <ArrowRight className="h-5 w-5" />
             </Link>
           </div>
+          {variant?.availableForSale && (
+            <CodButton
+              key={variant.id}
+              className="-mt-4 self-start"
+              items={[{ variantId: variant.id, quantity: 1, title: product.title, price: variant.price }]}
+            />
+          )}
         </div>
 
         {/* Centre: the arch, the product, the white loop, spheres and chips. */}
@@ -189,7 +202,10 @@ export function HeroShowcase({ models, startIndex }: { models: HeroModel[]; star
               </dl>
             </AccordionItem>
             <AccordionItem title="Envío y pago" group="hero" open>
-              Envío a toda Colombia, calculado al pagar según tu ciudad. Pagas de forma segura en el checkout de Shopify.
+              Envío a toda Colombia, calculado según tu ciudad.{" "}
+              {codEnabled
+                ? "Pagas en efectivo al recibir (contra entrega) o en línea en el checkout seguro de Shopify."
+                : "Pagas de forma segura en el checkout de Shopify."}
             </AccordionItem>
           </div>
         </div>

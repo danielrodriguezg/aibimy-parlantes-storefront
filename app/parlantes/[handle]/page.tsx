@@ -3,13 +3,16 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AddToCart } from "@/components/add-to-cart";
+import { FaqSection } from "@/components/faq";
 import { ProductGallery } from "@/components/product/product-gallery";
 import { AccordionItem } from "@/components/ui/accordion";
 import { ArrowLeft, ArrowRight, Chip } from "@/components/ui/icons";
 import { Circled } from "@/components/ui/scribble";
 import { bySize, getSpec, highlights, specRows } from "@/lib/catalog";
+import { productFaqs } from "@/lib/faq";
 import { formatMoney } from "@/lib/money";
 import { heroPhoto, photosFor, type ViewPhoto } from "@/lib/product-photos";
+import { JsonLd, SITE_URL, productSearchDescription, productSearchTitle } from "@/lib/seo";
 import { getProductByHandle, getProducts } from "@/lib/shopify";
 
 type Params = { params: Promise<{ handle: string }> };
@@ -22,10 +25,15 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const product = await getProductByHandle((await params).handle);
   if (!product) return {};
+  const spec = getSpec(product.handle);
+  const title = spec.summary ? productSearchTitle(spec) : product.title;
+  const description = spec.summary ? productSearchDescription(spec) : product.description.slice(0, 160);
+  const image = photosFor(product.handle)[0]?.src ?? product.featuredImage?.url;
   return {
-    title: product.title,
-    description: product.description.slice(0, 160),
-    openGraph: { images: product.featuredImage ? [product.featuredImage.url] : [] }
+    title,
+    description,
+    alternates: { canonical: `/parlantes/${product.handle}` },
+    openGraph: { type: "website", title, description, images: image ? [image] : [] }
   };
 }
 
@@ -52,35 +60,54 @@ export default async function ProductPage({ params }: Params) {
     .map(([label, value]): [string, string | null] => [label, label === "TWS" && spec.tws ? "Sí, con otro del mismo modelo" : value])
     .filter((fact): fact is [string, string] => Boolean(fact[1]));
 
+  const url = `${SITE_URL}/parlantes/${product.handle}`;
   const structuredData = {
     "@context": "https://schema.org",
-    "@type": "Product",
-    name: product.title,
-    brand: { "@type": "Brand", name: "AIBIMY" },
-    description: product.description,
-    image: images.map((image) => image.url),
-    offers: {
-      "@type": "Offer",
-      price: product.priceRange.minVariantPrice.amount,
-      priceCurrency: product.priceRange.minVariantPrice.currencyCode,
-      availability: product.availableForSale ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"
-    }
+    "@graph": [
+      {
+        "@type": "Product",
+        name: product.title,
+        sku: spec.code,
+        model: spec.code,
+        brand: { "@type": "Brand", name: "AIBIMY" },
+        description: product.description,
+        image: images.map((image) => image.url),
+        url,
+        offers: {
+          "@type": "Offer",
+          url,
+          price: product.priceRange.minVariantPrice.amount,
+          priceCurrency: product.priceRange.minVariantPrice.currencyCode,
+          availability: product.availableForSale ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+          itemCondition: "https://schema.org/NewCondition",
+          seller: { "@id": `${SITE_URL}/#org` }
+        }
+      },
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "Parlantes", item: `${SITE_URL}/#linea` },
+          { "@type": "ListItem", position: 2, name: spec.code, item: url }
+        ]
+      }
+    ]
   };
 
   return (
     <main className="pb-24 lg:pb-0">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData).replace(/</g, "\\u003c") }}
-      />
+      <JsonLd data={structuredData} />
 
       <section className="relative overflow-hidden px-5 pt-6 pb-20 sm:px-10">
         <div className="relative mx-auto grid max-w-7xl gap-10 lg:grid-cols-[minmax(0,4fr)_minmax(0,5fr)_minmax(0,3fr)] lg:items-center lg:gap-8">
           <div className="order-2 flex flex-col gap-7 lg:order-1">
-            <Link href="/#linea" className="flex items-center gap-2 text-sm text-grafito hover:text-tela">
+            <nav aria-label="Ruta" className="flex items-center gap-2 text-sm text-grafito">
               <ArrowLeft className="h-4 w-4" />
-              Todos los modelos
-            </Link>
+              <Link href="/#linea" className="hover:text-tela">
+                Parlantes
+              </Link>
+              <span aria-hidden>/</span>
+              <span className="text-tela">{spec.code}</span>
+            </nav>
             <div>
               <h1 className="display display-l">
                 <Circled>{spec.code.toLowerCase()}</Circled>
@@ -127,6 +154,8 @@ export default async function ProductPage({ params }: Params) {
           </div>
         </div>
       </section>
+
+      <FaqSection faqs={productFaqs(spec)} title={`preguntas sobre el ${spec.code.toLowerCase()}.`} group="faq-ficha" />
 
       {images.length > 0 && (
         <section className="px-5 py-20 sm:px-10">

@@ -18,6 +18,12 @@ Luzunido es la tienda; AIBIMY es la marca de los parlantes que vende. Tienda hea
 - **Trazos a mano** (`components/ui/scribble.tsx`): el óvalo naranja alrededor de una palabra, la flecha y el lazo blanco sobre el producto se dibujan solos una vez; con "reducir movimiento" aparecen ya dibujados.
 - Las cifras del catálogo salen de las descripciones de Shopify; lo que el fabricante no confirma queda en `null` y se muestra como "—".
 
+## Pago contra entrega
+
+"Pídelo y paga al recibir" (portada, ficha y carrito) abre un formulario corto: nombre, celular, departamento, ciudad, dirección y barrio. `/api/cod` valida los datos (celular colombiano, departamento válido, campo trampa contra bots, 4 pedidos por hora por IP, mismo origen), toma los precios de Shopify y crea el pedido con la Admin API: pago pendiente, etiqueta `contraentrega` y nota "Pago contra entrega". Dropi lo importa y la transportadora cobra al entregar.
+
+Antes de activarlo (`NEXT_PUBLIC_COD_ENABLED=true` y `COD_ORDERS_ENABLED=true`): conecta Dropi a la tienda propia, confirma en Dropi que los pedidos con pago pendiente y etiqueta `contraentrega` entran como contra entrega, y haz un pedido de prueba. Mientras el checkout esté apagado (`NEXT_PUBLIC_CHECKOUT_ENABLED`), el formulario tampoco aparece.
+
 ## Desarrollo
 
 ```bash
@@ -36,5 +42,9 @@ npm run dev
 | `SHOPIFY_PRODUCT_QUERY` | Qué productos se venden aquí (sintaxis de búsqueda de Shopify) |
 | `SHOPIFY_REVALIDATE_SECONDS` | Cada cuánto se refresca el catálogo |
 | `NEXT_PUBLIC_CHECKOUT_ENABLED` | `true` para recibir pedidos en producción. Sin esto, un deploy muestra el catálogo con un aviso de pruebas, no se indexa y no crea checkouts (en desarrollo siempre funciona) |
+| `NEXT_PUBLIC_COD_ENABLED` | `true` para ofrecer pago contra entrega en producción (en desarrollo siempre aparece). Muestra el formulario "Pídelo y paga al recibir" y la promesa en el sitio |
+| `SHOPIFY_ADMIN_ACCESS_TOKEN` | Token de Admin API con `write_orders` de la tienda que vende. Crea los pedidos contra entrega (pago pendiente, etiqueta `contraentrega`). **Secreto**: solo en el servidor |
+| `COD_ORDERS_ENABLED` | `true` para que `/api/cod` cree pedidos reales. Sin esto (también en desarrollo) responde "todavía no está habilitado", aunque haya token: así nunca se crean pedidos en una tienda prestada |
+| `NEXT_PUBLIC_COD_SHIPPING_FEE` | Envío contra entrega en COP; si está vacío se confirma por WhatsApp |
 | `SELLER_*` | Datos del vendedor (quien cobra y factura) para las páginas legales; ver `.env.example`. Si falta alguno, las páginas salen como borrador |
 | `NEXT_PUBLIC_SITE_URL` | URL pública del sitio |

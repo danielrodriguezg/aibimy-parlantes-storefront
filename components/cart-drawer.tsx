@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { CodButton } from "@/components/cod-form";
 import { useCart } from "@/components/cart-provider";
 import { formatMoney } from "@/lib/money";
 import { checkoutEnabled } from "@/lib/store";
@@ -103,8 +104,13 @@ export function CartDrawer() {
             disabled={!checkoutEnabled || items.length === 0 || status === "loading"}
             className="w-full rounded-full bg-tela py-4 font-medium text-white transition-transform hover:-translate-y-0.5 disabled:opacity-40 disabled:hover:translate-y-0"
           >
-            {!checkoutEnabled ? "Pagos disponibles muy pronto" : status === "loading" ? "Redirigiendo..." : "Ir a pagar"}
+            {!checkoutEnabled ? "Pagos disponibles muy pronto" : status === "loading" ? "Redirigiendo..." : "Pagar en línea"}
           </button>
+          <CodButton
+            className="mt-3 w-full"
+            items={items.map((line) => ({ variantId: line.variantId, quantity: line.quantity, title: line.title, price: line.price }))}
+            onDone={() => items.forEach((line) => remove(line.variantId))}
+          />
         </footer>
       </aside>
     </div>
