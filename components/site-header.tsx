@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useCart } from "@/components/cart-provider";
 import { Bag } from "@/components/ui/icons";
@@ -18,8 +19,9 @@ export function SiteHeader() {
             Comparar
           </Link>
         </nav>
-        <Link href="/" className="wordmark text-[1.75rem] text-caucho" aria-label="Luzunido, inicio">
-          luzunido
+        {/* TEMPORAL: logo de Grupo Mitech para capturas. No fusionar a main. */}
+        <Link href="/" aria-label="GM, inicio">
+          <Image src="/brand/gm-logo.png" alt="GM" width={502} height={308} priority className="h-12 w-auto" />
         </Link>
         <button
           onClick={open}
