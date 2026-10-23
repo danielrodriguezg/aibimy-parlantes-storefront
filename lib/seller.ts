@@ -22,6 +22,10 @@ export const SELLER = {
   /** Delivery estimate as customers read it, e.g. "2 a 6 días hábiles". */
   shippingTime: or("SELLER_SHIPPING_TIME", "X a Y días hábiles"),
   updated: or("SELLER_POLICY_DATE", "fecha de publicación"),
+  /** Digits only, for wa.me links; null hides the WhatsApp button. */
+  whatsappNumber: value("SELLER_WHATSAPP")?.replace(/\D/g, "") || null,
+  /** The delivery estimate when it is set, for copy that shouldn't show a placeholder. */
+  shippingTimeKnown: value("SELLER_SHIPPING_TIME"),
   /** Draft until every seller field is set; a lawyer reviews the texts before real sales. */
   draft: required.some((name) => !value(name))
 };
