@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Comfortaa, Onest, Unbounded } from "next/font/google";
+import Image from "next/image";
 import Link from "next/link";
 import { CartDrawer } from "@/components/cart-drawer";
 import { CartProvider } from "@/components/cart-provider";
@@ -40,7 +41,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <footer className="border-t border-tela/10 px-5 py-12 text-sm text-grafito sm:px-10">
             <div className="mx-auto flex max-w-7xl flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <p className="wordmark text-2xl text-caucho">gm</p>
+                <Image src="/brand/gm-logo.png" alt="GM" width={502} height={308} className="h-12 w-auto" />
                 <p className="mt-2">Parlantes AIBIMY originales.</p>
               </div>
               <nav aria-label="Pie de página" className="flex flex-wrap gap-x-6 gap-y-2">
