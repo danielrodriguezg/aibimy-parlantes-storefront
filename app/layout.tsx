@@ -40,7 +40,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <footer className="border-t border-tela/10 px-5 py-12 text-sm text-grafito sm:px-10">
             <div className="mx-auto flex max-w-7xl flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <p className="wordmark text-2xl text-caucho">luzunido</p>
+                <p className="wordmark text-2xl text-caucho">gm</p>
                 <p className="mt-2">Parlantes AIBIMY originales.</p>
               </div>
               <nav aria-label="Pie de página" className="flex flex-wrap gap-x-6 gap-y-2">
@@ -63,7 +63,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   Privacidad
                 </Link>
               </nav>
-              <p>© {new Date().getFullYear()} Luzunido. Envíos a toda Colombia.</p>
+              <p>© {new Date().getFullYear()} GM. Envíos a toda Colombia.</p>
             </div>
           </footer>
         </CartProvider>
